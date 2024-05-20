@@ -1,0 +1,39 @@
+server:
+  port: 8082
+  servlet:
+    context-path: /ebank
+spring:
+  datasource:
+    username: postgres
+    password: root
+    url: "jdbc:postgresql://localhost:5432/ebank"
+    driverClassName: "org.postgresql.Driver"
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  mail:
+    host: smtp.gmail.com
+    username:
+    password:
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: notification
+    template:
+      default-topic: balance_account_change
+app:
+  openfee: 100000
+  min: 000000000
+  max: 999999999
+  interest_credit: 0.05
+  interest_loan: 0.1
+  services:
+    profile: http://localhost:8081/profile
+    identity: http://localhost:8080/identity
