@@ -19,13 +19,14 @@ import java.util.Set;
 public class CreditCardResponse {
     String id;
     String userId;
+    String password;
     String cvv;
     LocalDate expireDate;
     BigDecimal totalLimit;
     BigDecimal availableLimit;
     BigDecimal currentDebt;
     BigDecimal minimumPaymentAmount;
-    LocalDate cutoffDate;
+    Integer cutoffDate;
     LocalDate dueDate;
     Set<CreditCardPayment> creditCardPayments;
 }

@@ -16,6 +16,15 @@ public enum ErrorCode {
     UNAUTHENTICATED(1006, "Unauthenticated", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED(1007, "You do not have permission", HttpStatus.FORBIDDEN),
     INVALID_DOB(1008, "Your age must be at least {min}", HttpStatus.BAD_REQUEST),
+    EMAIL_INVALID(1009,"Your email is not in the correct format",HttpStatus.BAD_REQUEST),
+    EMAIL_EXISTED(1010,"Your email existed",HttpStatus.BAD_REQUEST),
+    PHONE_INVALID(1011,"Your phone is not in the correct format",HttpStatus.BAD_REQUEST),
+    EMAIL_NOT_BLANK(1012,"Your email cannot be blank",HttpStatus.BAD_REQUEST),
+    PHONE_NOT_BLANK(1013,"Your phone cannot be blank",HttpStatus.BAD_REQUEST),
+    CITIZEN_CARD_ID_NOT_BLANK(1014,"Citizen card id cannot be blank",HttpStatus.BAD_REQUEST),
+    CITIZEN_CARD_ID_INVALID(1015,"Citizen card id must be less than 12 number",HttpStatus.BAD_REQUEST),
+    ONE_ACCOUNT_LOGIN(1016,"Only one account can be logged in",HttpStatus.BAD_REQUEST),
+    TOKEN_EXPIRED(1017,"Your token already expired",HttpStatus.BAD_REQUEST)
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

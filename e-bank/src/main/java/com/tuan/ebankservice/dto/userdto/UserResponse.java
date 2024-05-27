@@ -16,6 +16,8 @@ public class UserResponse {
     String id;
     String username;
     String firstName;
+    String phone;
+    String email;
     String lastName;
     String citizenIdCard;
     LocalDate dob;

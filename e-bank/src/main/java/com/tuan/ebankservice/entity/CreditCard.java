@@ -1,11 +1,10 @@
 package com.tuan.ebankservice.entity;
 
-import com.tuan.ebankservice.util.CreditCardStatus;
+
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.hibernate.annotations.CreationTimestamp;
-import org.springframework.data.annotation.CreatedDate;
+
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -29,7 +28,7 @@ public class CreditCard {
     BigDecimal availableLimit;
     BigDecimal currentDebt;
     BigDecimal minimumPaymentAmount;
-    LocalDate cutoffDate;
+    Integer cutoffDate;
     LocalDate dueDate;
     LocalDateTime cancelDate;
     String status;

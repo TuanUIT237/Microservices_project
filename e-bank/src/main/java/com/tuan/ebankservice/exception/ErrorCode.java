@@ -54,7 +54,9 @@ public enum ErrorCode {
     STATUS_ACCOUNT_NOT_BLANK(1543,"Status account cannot be left blank",HttpStatus.BAD_REQUEST),
     CANCEL_DATE_ACCOUNT_NOT_BLANK(1544,"Cancel date account cannot be left blank",HttpStatus.BAD_REQUEST),
     ACCOUNT_CANCELED(1545,"Account was canceled",HttpStatus.BAD_REQUEST),
-    LOAN_NOT_EXISTED(1546,"Loan not existed",HttpStatus.BAD_REQUEST);
+    LOAN_NOT_EXISTED(1546,"Loan not existed",HttpStatus.BAD_REQUEST),
+    UNAUTHENTICATED(1006, "Unauthenticated", HttpStatus.UNAUTHORIZED),
+    UNAUTHORIZED(1007, "You do not have permission", HttpStatus.FORBIDDEN),;
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
         this.code = code;
         this.message = message;

@@ -27,6 +27,6 @@ public class CreditCardUpdateRequest {
     BigDecimal currentDebt;
     @NotNull(message = "MINIMUM_PAYMENT_NOT_NULL")
     BigDecimal minimumPaymentAmount;
-    LocalDate cutoffDate;
+    Integer cutoffDate;
     LocalDate dueDate;
 }

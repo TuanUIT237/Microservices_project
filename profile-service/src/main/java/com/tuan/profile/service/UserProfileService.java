@@ -1,7 +1,10 @@
 package com.tuan.profile.service;
 
 import java.util.List;
+import java.util.Objects;
 
+import com.tuan.profile.exception.AppException;
+import com.tuan.profile.exception.ErrorCode;
 import org.springframework.stereotype.Service;
 
 import com.tuan.profile.dto.userprofileDto.ProfileCreationRequest;
@@ -51,15 +54,20 @@ public class UserProfileService {
     }
 
     public String findUserIdByName(ProfileGetUserIdRequest request) {
+        if(userProfileRepository.existsByCitizenIdCard(request.getCitizenIdCard()))
+            throw new AppException(ErrorCode.CITIZEN_CARD_ID_EXISTED);
         int index = request.getFullName().indexOf(" ");
         String firstName = request.getFullName().substring(0, index);
         String lastName = request.getFullName().replace(firstName + " ", "");
         UserProfile userProfile = userProfileRepository.findByFirstNameAndLastNameAndCitizenIdCard(
                 firstName, lastName, request.getCitizenIdCard());
-        if (userProfile == null) return null;
+        if (Objects.isNull(userProfile)) return null;
+
         return userProfile.getUserId();
     }
-
+    public boolean findEmailExisted(String email){
+        return userProfileRepository.existsByEmail(email);
+    }
     public String deleteProfile(String id) {
         userProfileRepository.deleteById(id);
         return "Profile has been deleted";

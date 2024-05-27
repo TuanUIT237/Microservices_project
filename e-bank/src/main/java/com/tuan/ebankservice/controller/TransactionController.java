@@ -24,7 +24,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class TransactionController {
     TransactionService transactionService;
-    @GetMapping("")
+    @GetMapping("/")
     ApiResponse<List<Transaction>> getTransactions (@RequestBody @Valid BankStatementRequest request){
         return ApiResponse.<List<Transaction>>builder()
                 .message(HttpStatus.FOUND.name())

@@ -1,5 +1,6 @@
 package com.tuan.identityservice.entity;
 
+import java.util.List;
 import java.util.Set;
 
 import jakarta.persistence.*;
@@ -23,4 +24,7 @@ public class User {
 
     @ManyToMany
     Set<Role> roles;
+    @OneToMany
+    @JoinColumn(name = "userid")
+    List<RegistrationToken> registrationTokens;
 }

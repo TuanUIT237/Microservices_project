@@ -1,4 +1,4 @@
-package com.tuan.ebankservice.dto.emaildto;
+package com.tuan.notificationservice.dto.emaildto;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;

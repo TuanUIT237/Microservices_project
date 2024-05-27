@@ -1,5 +1,6 @@
 package com.tuan.ebankservice.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.tuan.ebankservice.dto.accountdto.*;
 import com.tuan.ebankservice.dto.apiresponse.ApiResponse;
 import com.tuan.ebankservice.dto.creditcarddto.CreditCardCreationRequest;
@@ -65,7 +66,7 @@ public class AccountController {
                 .build();
     }
     @PostMapping("/deposit")
-    ApiResponse<String> deposit(@RequestBody @Valid CreditDebitAccountRequest request){
+    ApiResponse<String> deposit(@RequestBody @Valid CreditDebitAccountRequest request) throws JsonProcessingException {
         return ApiResponse.<String>builder()
                 .message(HttpStatus.OK.name())
                 .code(HttpStatus.OK.value())
@@ -73,7 +74,7 @@ public class AccountController {
                 .build();
     }
     @PostMapping("/withdraw")
-    ApiResponse<String> withdraw(@RequestBody @Valid CreditDebitAccountRequest request){
+    ApiResponse<String> withdraw(@RequestBody @Valid CreditDebitAccountRequest request) throws JsonProcessingException {
         return ApiResponse.<String>builder()
                 .message(HttpStatus.OK.name())
                 .code(HttpStatus.OK.value())
@@ -81,7 +82,7 @@ public class AccountController {
                 .build();
     }
     @PostMapping("/transfer")
-    ApiResponse<String> transfer(@RequestBody @Valid TransferRequest request){
+    ApiResponse<String> transfer(@RequestBody @Valid TransferRequest request) throws JsonProcessingException {
         return ApiResponse.<String>builder()
                 .message(HttpStatus.OK.name())
                 .code(HttpStatus.OK.value())

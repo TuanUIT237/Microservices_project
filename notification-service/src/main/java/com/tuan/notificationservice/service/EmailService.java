@@ -1,7 +1,8 @@
-package com.tuan.ebankservice.service;
+package com.tuan.notificationservice.service;
 
 
-import com.tuan.ebankservice.dto.emaildto.EmailDetailRequest;
+
+import com.tuan.notificationservice.dto.emaildto.EmailDetailRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

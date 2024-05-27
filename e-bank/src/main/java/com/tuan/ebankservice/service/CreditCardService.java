@@ -2,6 +2,8 @@ package com.tuan.ebankservice.service;
 
 import com.tuan.ebankservice.constant.PredefinedCreditCard;
 import com.tuan.ebankservice.dto.creditcarddto.*;
+import com.tuan.ebankservice.dto.userdto.UserCreationRequest;
+import com.tuan.ebankservice.dto.userprofiledto.ProfileGetUserIdRequest;
 import com.tuan.ebankservice.entity.CreditCard;
 import com.tuan.ebankservice.entity.CreditCardPayment;
 import com.tuan.ebankservice.exception.AppException;
@@ -10,6 +12,8 @@ import com.tuan.ebankservice.mapper.CreditCardMapper;
 import com.tuan.ebankservice.mapper.CreditCardPaymentMapper;
 
 import com.tuan.ebankservice.repository.CreditCardRepository;
+import com.tuan.ebankservice.repository.httpclient.ProfileClient;
+import com.tuan.ebankservice.repository.httpclient.UserClient;
 import com.tuan.ebankservice.util.CreditCardStatus;
 import com.tuan.ebankservice.util.CreditPaymentType;
 import com.tuan.ebankservice.util.StringUtil;
@@ -21,6 +25,7 @@ import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -28,6 +33,9 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import java.time.Month;
+import java.time.Year;
+import java.util.Date;
 import java.util.List;
 
 
@@ -43,6 +51,9 @@ public class CreditCardService {
     CreditCardMapper creditCardMapper;
     CreditCardPaymentService creditCardPaymentService;
     CreditCardPaymentMapper creditCardPaymentMapper;
+    ProfileClient profileClient;
+    UserService userService;
+
     public CreditCard getCreditCard(String id){
         return creditCardRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.CREDIT_CARD_NOT_EXISTED)
         );
@@ -51,17 +62,33 @@ public class CreditCardService {
         return creditCardRepository.findAll().stream().map(creditCardMapper::toCreditCardResponse).toList();
     }
     public CreditCardResponse createCreditCard(CreditCardCreationRequest request){
+        ProfileGetUserIdRequest profileGetUserIdRequest = ProfileGetUserIdRequest.builder()
+                .citizenIdCard(request.getCitizenIdCard())
+                .fullName(request.getName())
+                .build();
+        String userId = profileClient.getUserId(profileGetUserIdRequest);
+        String passwordRandom = null;
+        if(!(StringUtils.hasText(userId))) {
+            passwordRandom = StringUtil.getRandomNumberAsString(6);
+            userId = userService.createUser(request.getName(),
+                    passwordRandom,
+                    request.getEmail(),
+                    request.getCitizenIdCard());
+        }
+
         CreditCard creditCard = creditCardMapper.toCreditCard(request);
-        creditCard.setExpireDate(LocalDate.now().plusYears(5));
+        creditCard.setUserId(userId);
         creditCard.setTotalLimit(request.getLimit());
         creditCard.setAvailableLimit(request.getLimit());
         creditCard.setCurrentDebt(BigDecimal.ZERO);
         creditCard.setMinimumPaymentAmount(calculateMinimumPaymentAmount(request.getLimit()));
-        creditCard.setDueDate(LocalDate.now().plusMonths(36));
-        creditCard.setCvv(String.valueOf(StringUtil.getRandomNumber(7)));
-        creditCard.setCutoffDate(LocalDate.now().plusMonths(33));
-        creditCard.setStatus(CreditCardStatus.ACTIVE.toString());
-        return creditCardMapper.toCreditCardResponse(creditCardRepository.save(creditCard));
+        creditCard.setCutoffDate(request.getDayOfCutOff());
+
+        CreditCardResponse creditCardResponse = creditCardMapper.toCreditCardResponse(creditCardRepository.save(creditCard));
+        creditCardResponse.setUserId(userId);
+        creditCardResponse.setPassword(passwordRandom);
+
+        return creditCardResponse;
     }
     public BigDecimal calculateMinimumPaymentAmount(BigDecimal limit){
         return BigDecimal.valueOf(INTEREST * limit.floatValue());
@@ -143,7 +170,8 @@ public class CreditCardService {
 
         return addCreditCardPayment(creditCard, creditCardPayment);
     }
-    private CreditCardPaymentResponse addCreditCardPayment(CreditCard creditCard, CreditCardPayment creditCardPayment) {
+    @Transactional
+    public CreditCardPaymentResponse addCreditCardPayment(CreditCard creditCard, CreditCardPayment creditCardPayment) {
         creditCard.getCreditCardPayments().add(creditCardPayment);
         creditCardRepository.save(creditCard);
         CreditCardPaymentResponse creditCardPaymentResponse =

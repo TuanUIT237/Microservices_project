@@ -17,6 +17,7 @@ public interface UserMapper {
 
     UserResponse toUserResponse(User user);
 
+    @Mapping(target = "id", ignore = true)
     void toUserResponsefromUserProfile(@MappingTarget UserResponse userResponse, UserProfileResponse profile);
 
     @Mapping(target = "roles", ignore = true)

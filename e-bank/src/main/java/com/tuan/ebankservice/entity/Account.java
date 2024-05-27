@@ -35,6 +35,5 @@ public class Account {
     String userId;
     @CreationTimestamp
     LocalDateTime createDate;
-    @CreationTimestamp
     LocalDateTime cancelDate;
 }

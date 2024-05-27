@@ -2,8 +2,7 @@ package com.tuan.identityservice.repository.httpcilent;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import com.tuan.identityservice.dto.ProfileDto.ProfileCreationRequest;
 import com.tuan.identityservice.dto.ProfileDto.UserProfileResponse;
@@ -13,4 +12,6 @@ import com.tuan.identityservice.dto.ProfileDto.UserProfileResponse;
 public interface ProfileCilent {
     @PostMapping(value = "/internal/create", produces = MediaType.APPLICATION_JSON_VALUE)
     UserProfileResponse createProfile(@RequestBody ProfileCreationRequest request);
+    @PostMapping(value = "/internal/emailvalid", produces = MediaType.APPLICATION_JSON_VALUE)
+    boolean emailExisted(@RequestBody String email);
 }

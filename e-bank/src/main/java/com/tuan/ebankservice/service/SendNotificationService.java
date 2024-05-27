@@ -1,6 +1,8 @@
 package com.tuan.ebankservice.service;
 
-import com.tuan.ebankservice.dto.notificationdto.NotificationRequest;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tuan.ebankservice.dto.notificationdto.MessageUserRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
@@ -18,9 +20,11 @@ public class SendNotificationService {
     @NonFinal
     String topic;
 
-    KafkaTemplate<String, NotificationRequest> kafkaTemplate;
+    KafkaTemplate<String, String> kafkaTemplate;
+    ObjectMapper kafkaObjectMapper;
 
-    public void sendBalance(NotificationRequest request){
-        kafkaTemplate.send(topic, request);
+    public void sendBalance(String id, MessageUserRequest request) throws JsonProcessingException {
+        String message = kafkaObjectMapper.writeValueAsString(request);
+        kafkaTemplate.send(topic,id,message);
     }
 }

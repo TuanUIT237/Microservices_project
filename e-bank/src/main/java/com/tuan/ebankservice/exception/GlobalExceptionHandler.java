@@ -1,9 +1,7 @@
 package com.tuan.ebankservice.exception;
 
 
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.tuan.ebankservice.dto.apiresponse.ApiResponse;
 import feign.FeignException;
 import jakarta.validation.ConstraintViolation;
@@ -31,7 +29,7 @@ public class GlobalExceptionHandler {
         ErrorCode errorCode = ErrorCode.UNCATEGORIZED_EXCEPTION;
         ApiResponse response = new ApiResponse();
         response.setCode(errorCode.getCode());
-        response.setMessage(Objects.isNull(exception.getMessage()) ? errorCode.getMessage() : exception.getMessage());
+        response.setMessage(errorCode.getMessage());
         return ResponseEntity.badRequest().body(response);
     }
 

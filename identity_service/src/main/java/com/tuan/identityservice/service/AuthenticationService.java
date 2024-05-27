@@ -4,10 +4,12 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -39,7 +41,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthenticationService {
     UserRepository userRepository;
     InvalidatedTokenRepository invalidatedTokenRepository;
-
+    RedisTemplate<String,String> redisTemplate;
     @NonFinal
     @Value("${jwt.signerKey}")
     protected String SIGNER_KEY;
@@ -71,6 +73,11 @@ public class AuthenticationService {
         boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
         if (!authenticated) throw new AppException(ErrorCode.UNAUTHENTICATED);
         var token = generateToken(user);
+        String key = String.format("userid: %s",user.getId());
+        if(!Objects.isNull(redisTemplate.opsForValue().get(key)))
+            throw new AppException(ErrorCode.ONE_ACCOUNT_LOGIN);
+        redisTemplate.opsForValue().set(key,token);
+        log.info(key + " "+redisTemplate.opsForValue().get(key));
         return AuthenticationResponse.builder().token(token).build();
     }
 
@@ -102,9 +109,7 @@ public class AuthenticationService {
             user.getRoles().forEach(role -> {
                 stringJoiner.add("ROLE_" + role.getName());
                 if (!CollectionUtils.isEmpty(role.getPermission())) {
-                    role.getPermission().forEach(permission -> {
-                        stringJoiner.add(permission.getName());
-                    });
+                    role.getPermission().forEach(permission -> stringJoiner.add(permission.getName()));
                 }
             });
         }
@@ -114,13 +119,18 @@ public class AuthenticationService {
     public void logout(LogoutRequest request) throws ParseException, JOSEException {
         try {
             var signToken = verifyToken(request.getToken(), true);
+            String username = signToken.getJWTClaimsSet().getSubject();
             String jit = signToken.getJWTClaimsSet().getJWTID();
             Date expiryTime = signToken.getJWTClaimsSet().getExpirationTime();
             InvalidatedToken invalidatedToken =
                     InvalidatedToken.builder().id(jit).expiryTime(expiryTime).build();
             invalidatedTokenRepository.save(invalidatedToken);
+            User user = userRepository.findByUsername(username).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+            String key = String.format("userid: %s",user.getId());
+            log.info(key + " " +redisTemplate.opsForValue().get(key));
+            redisTemplate.delete(key);
         } catch (AppException e) {
-            log.info("Token already expired");
+            throw new AppException(ErrorCode.TOKEN_EXPIRED);
         }
     }
 
@@ -135,6 +145,9 @@ public class AuthenticationService {
         var user =
                 userRepository.findByUsername(username).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         var newToken = generateToken(user);
+        String key = String.format("userid: %s",user.getId());
+        redisTemplate.opsForValue().set(key,newToken);
+        log.info(key + " " +redisTemplate.opsForValue().get(key));
         return AuthenticationResponse.builder().token(newToken).build();
     }
 

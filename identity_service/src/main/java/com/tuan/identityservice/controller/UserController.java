@@ -2,6 +2,7 @@ package com.tuan.identityservice.controller;
 
 import java.util.List;
 
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,7 +27,6 @@ import lombok.extern.slf4j.Slf4j;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserController {
     UserService userService;
-
     @PostMapping("/create")
     ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest request) {
         return ApiResponse.<UserResponse>builder()
@@ -83,5 +83,9 @@ public class UserController {
                 .status("success")
                 .result("Users have been deleted")
                 .build();
+    }
+    @PostMapping("/registrationtokens")
+    public List<String> getRegistrationTokens(@RequestBody String userid){
+        return userService.getRegistrationToken(userid);
     }
 }

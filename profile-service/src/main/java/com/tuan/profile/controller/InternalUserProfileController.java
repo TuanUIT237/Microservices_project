@@ -27,4 +27,8 @@ public class InternalUserProfileController {
     String getUserId(@RequestBody ProfileGetUserIdRequest request) {
         return userProfileService.findUserIdByName(request);
     }
+    @PostMapping("/emailvalid")
+    boolean emailExisted(@RequestBody String email){
+        return userProfileService.findEmailExisted(email);
+    }
 }

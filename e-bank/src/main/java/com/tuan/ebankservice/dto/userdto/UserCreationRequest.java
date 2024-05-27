@@ -1,6 +1,5 @@
 package com.tuan.ebankservice.dto.userdto;
 
-import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -14,6 +13,8 @@ import java.time.LocalDate;
 public class UserCreationRequest {
     String username;
     String password;
+    String email;
+    String phone;
     String firstName;
     String lastName;
     String citizenIdCard;

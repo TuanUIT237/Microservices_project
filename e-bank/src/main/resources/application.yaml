@@ -12,20 +12,8 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
-  mail:
-    host: smtp.gmail.com
-    username:
-    password:
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
   kafka:
     bootstrap-servers: localhost:9092
-    consumer:
-      group-id: notification
     template:
       default-topic: balance_account_change
 app:

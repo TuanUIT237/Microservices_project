@@ -19,5 +19,7 @@ public class LoanResponse {
     BigDecimal principalToBePaid;
     BigDecimal remainingPrincipal;
     LocalDate dueDate;
+    String userId;
+    String password;
     String status;
 }

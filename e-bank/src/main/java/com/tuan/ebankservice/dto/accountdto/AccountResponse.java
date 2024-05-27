@@ -16,5 +16,7 @@ public class AccountResponse {
     String id;
     BigDecimal balance;
     String name;
+    String userId;
+    String password;
     AccountStatus status;
 }
