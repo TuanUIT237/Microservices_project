@@ -4,8 +4,10 @@ package com.tuan.notificationservice.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tuan.notificationservice.dto.emaildto.EmailDetailRequest;
 import com.tuan.notificationservice.dto.emaildto.MessageUserResponse;
 
+import com.tuan.notificationservice.dto.notificationdto.MessageLoginResponse;
 import com.tuan.notificationservice.entity.MessageUser;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -25,10 +27,11 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ReceiveNotificationService {
+    EmailService emailService;
     ObjectMapper kafkaObjectMapper;
     MessageService messageService;
     @KafkaListener(
-            topics = "${spring.kafka.template.default-topic}",
+            topics = "${app.redis-topic.balance_account_change}",
             groupId = "${spring.kafka.consumer.group-id}"
     )
     public void listen(ConsumerRecord<String,String> record) throws JsonProcessingException {
@@ -49,5 +52,19 @@ public class ReceiveNotificationService {
                 .registrationTokens(registrationTokens)
                 .build();
         messageService.pushNotification(messageUser);
+    }
+    @KafkaListener(
+            topics = "${app.redis-topic.login}",
+            groupId = "${spring.kafka.consumer.group-id}"
+    )
+    public void listenLogin(ConsumerRecord<String,String> record) throws JsonProcessingException {
+        MessageLoginResponse notificationResponse =
+                kafkaObjectMapper.readValue(record.value(), MessageLoginResponse.class);
+        EmailDetailRequest emailDetailRequest = EmailDetailRequest.builder()
+                .recipient(notificationResponse.getEmail())
+                .subject("Notice to log in to EBank")
+                .messageBody("You have just signed in on the device")
+                .build();
+        emailService.sendEmailAlert(emailDetailRequest);
     }
 }

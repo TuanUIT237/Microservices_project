@@ -3,12 +3,12 @@ package com.tuan.identityservice.service;
 import java.util.HashSet;
 import java.util.List;
 
-import com.tuan.identityservice.entity.RegistrationToken;
+
 import com.tuan.identityservice.repository.RegistrationTokenRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -66,13 +66,6 @@ public class UserService {
         UserResponse userResponse = userMapper.toUserResponse(user);
         userMapper.toUserResponsefromUserProfile(userResponse, userProfileResponse);
         return userResponse;
-    }
-
-    public UserResponse getUserInfo() {
-        var context = SecurityContextHolder.getContext();
-        String name = context.getAuthentication().getName();
-        User user = userRepository.findByUsername(name).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        return userMapper.toUserResponse(user);
     }
 
     public UserResponse updateUser(UserUpdateRequest request) {

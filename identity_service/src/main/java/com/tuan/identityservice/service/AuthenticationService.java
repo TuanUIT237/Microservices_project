@@ -8,6 +8,8 @@ import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.UUID;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.tuan.identityservice.dto.notificationdto.MessageLoginRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -42,6 +44,7 @@ public class AuthenticationService {
     UserRepository userRepository;
     InvalidatedTokenRepository invalidatedTokenRepository;
     RedisTemplate<String,String> redisTemplate;
+    SendNotificationService sendNotificationService;
     @NonFinal
     @Value("${jwt.signerKey}")
     protected String SIGNER_KEY;
@@ -65,7 +68,7 @@ public class AuthenticationService {
         return VerifyTokenResponse.builder().valid(isValid).build();
     }
 
-    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+    public AuthenticationResponse authenticate(AuthenticationRequest request) throws JsonProcessingException {
         var user = userRepository
                 .findByUsername(request.getUsername())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
@@ -78,6 +81,11 @@ public class AuthenticationService {
             throw new AppException(ErrorCode.ONE_ACCOUNT_LOGIN);
         redisTemplate.opsForValue().set(key,token);
         log.info(key + " "+redisTemplate.opsForValue().get(key));
+
+        MessageLoginRequest messageLoginRequest = MessageLoginRequest.builder()
+                .email("23072002td@gmail.com")
+                .build();
+        sendNotificationService.sendLoginMessage(user.getId(), messageLoginRequest);
         return AuthenticationResponse.builder().token(token).build();
     }
 

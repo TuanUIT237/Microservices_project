@@ -12,9 +12,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
+import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.kafka.core.KafkaAdmin;
+
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -30,7 +32,10 @@ public class KafkaConsumerConfig {
 
     @Value("${spring.kafka.consumer.group-id}")
     private String kafkaGroupId;
-
+    @Value("${app.redis-topic.balance_account_change}")
+    private String balance_account_change;
+    @Value("${app.redis-topic.login}")
+    private String login;
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory(){
         ConcurrentKafkaListenerContainerFactory<String, String> factory =
@@ -60,5 +65,13 @@ public class KafkaConsumerConfig {
         module.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(DateTimeFormatter.ISO_DATE_TIME));
         objectMapper.registerModule(module);
         return objectMapper;
+    }
+    @Bean
+    public KafkaAdmin.NewTopics createTopic() {
+        return new KafkaAdmin.NewTopics(
+                TopicBuilder.name(balance_account_change)
+                        .build(),
+                TopicBuilder.name(login)
+                        .build());
     }
 }

@@ -2,7 +2,6 @@ package com.tuan.identityservice.controller;
 
 import java.util.List;
 
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -46,13 +45,6 @@ public class UserController {
                 .build();
     }
 
-    @GetMapping("/userinfo")
-    ApiResponse<UserResponse> getUserInfo() {
-        return ApiResponse.<UserResponse>builder()
-                .status("success")
-                .result(userService.getUserInfo())
-                .build();
-    }
 
     @GetMapping("/{userId}")
     ApiResponse<UserResponse> getUser(@PathVariable("userId") String userId) {
