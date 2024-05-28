@@ -1,4 +1,4 @@
-package com.tuan.notificationservice.dto.emaildto;
+package com.tuan.notificationservice.dto.notificationdto;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -12,7 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class MessageUserResponse {
+public class MessageAccountResponse {
     BigDecimal amount;
     String paymentType;
     LocalDateTime datePayment;

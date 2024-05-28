@@ -30,7 +30,6 @@ public class SecurityConfig {
             "/loan/create",
             "/credit/create",
             "/credit/spend",
-            "/credit/add"
     };
 
     @Bean

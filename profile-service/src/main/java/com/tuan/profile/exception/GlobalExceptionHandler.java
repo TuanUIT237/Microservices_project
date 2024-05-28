@@ -40,34 +40,4 @@ public class GlobalExceptionHandler {
                         .message(errorCode.getMessage())
                         .build());
     }
-
-    //    @ExceptionHandler(value = MethodArgumentNotValidException.class)
-    //    ResponseEntity<ApiResponse> hanldingValidation(MethodArgumentNotValidException exception) {
-    //        String enumkey = exception.getFieldError().getDefaultMessage();
-    //        ErrorCode errorCode = ErrorCode.INVALID_KEY;
-    //        Map<String, Object> attributes = null;
-    //        try {
-    //            errorCode = ErrorCode.valueOf(enumkey);
-    //            var constraintViolation =
-    //                    exception.getBindingResult().getAllErrors().get(0).unwrap(ConstraintViolation.class);
-    //            attributes = constraintViolation.getConstraintDescriptor().getAttributes();
-    //            log.info(attributes.toString());
-    //        } catch (IllegalArgumentException e) {
-    //
-    //        }
-    //
-    //        ApiResponse respone = new ApiResponse();
-    //        respone.setStatus("failed");
-    //        respone.setMessage(
-    //                Objects.nonNull(attributes)
-    //                        ? mapAttribute(errorCode.getMessage(), attributes)
-    //                        : errorCode.getMessage());
-    //        return ResponseEntity.badRequest().body(respone);
-    //    }
-
-    //    private String mapAttribute(String message, Map<String, Object> attributes) {
-    //        String minValue = String.valueOf(attributes.get(MIN_ATTRIBUTE));
-    //
-    //        return message.replace("{" + MIN_ATTRIBUTE + "}", minValue);
-    //    }
 }

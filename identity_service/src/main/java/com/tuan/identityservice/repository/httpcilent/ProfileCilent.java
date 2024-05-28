@@ -12,6 +12,9 @@ import com.tuan.identityservice.dto.ProfileDto.UserProfileResponse;
 public interface ProfileCilent {
     @PostMapping(value = "/internal/create", produces = MediaType.APPLICATION_JSON_VALUE)
     UserProfileResponse createProfile(@RequestBody ProfileCreationRequest request);
+
     @PostMapping(value = "/internal/emailvalid", produces = MediaType.APPLICATION_JSON_VALUE)
     boolean emailExisted(@RequestBody String email);
+    @PostMapping(value = "/internal/user", produces = MediaType.APPLICATION_JSON_VALUE)
+    UserProfileResponse getProfileByUserId(@RequestBody String userId);
 }

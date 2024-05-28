@@ -1,19 +1,20 @@
 package com.tuan.ebankservice.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.tuan.ebankservice.dto.loandto.*;
 
-import com.tuan.ebankservice.dto.userdto.UserCreationRequest;
+
+import com.tuan.ebankservice.dto.notificationdto.MessageLoanRequest;
+
 import com.tuan.ebankservice.dto.userprofiledto.ProfileGetUserIdRequest;
 import com.tuan.ebankservice.entity.Loan;
 import com.tuan.ebankservice.entity.LoanPayment;
 import com.tuan.ebankservice.exception.AppException;
 import com.tuan.ebankservice.exception.ErrorCode;
 import com.tuan.ebankservice.mapper.LoanMapper;
-
 import com.tuan.ebankservice.mapper.LoanPaymentMapper;
 import com.tuan.ebankservice.repository.LoanRepository;
 import com.tuan.ebankservice.repository.httpclient.ProfileClient;
-import com.tuan.ebankservice.repository.httpclient.UserClient;
 import com.tuan.ebankservice.util.LoanStatus;
 import com.tuan.ebankservice.util.StringUtil;
 import jakarta.transaction.Transactional;
@@ -28,7 +29,9 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -43,6 +46,7 @@ public class LoanService {
     LoanPaymentMapper loanPaymentMapper;
     ProfileClient profileClient;
     UserService userService;
+    SendNotificationService sendNotificationService;
     @Transactional
     public LoanResponse createLoan(LoanCreationRequest request){
         ProfileGetUserIdRequest profileGetUserIdRequest = ProfileGetUserIdRequest.builder()
@@ -97,11 +101,20 @@ public class LoanService {
         BigDecimal dayLateCount = lateDayCount(loan).divide(BigDecimal.valueOf(365),RoundingMode.UP);
         return loan.getRemainingPrincipal().multiply(totalInterestRate).multiply(dayLateCount);
     }
-    public void updateLoanLate(Loan loan){
+    public void updateLoanLate(Loan loan) throws JsonProcessingException {
         loan.setRemainingPrincipal(loan.getRemainingPrincipal().add(calculateLateFee(loan))
                 .setScale(0,RoundingMode.CEILING));
         loan.setStatus(LoanStatus.LATE.name());
         loanRepository.save(loan);
+        List<String> registrationTokens = userService.getRegistrationTokens(loan.getUserId());
+        MessageLoanRequest notificationRequest = MessageLoanRequest.builder()
+                .datePayment(LocalDateTime.now())
+                .amount(calculateLateFee(loan))
+                .paymentType("LATE")
+                .registrationTokens(registrationTokens)
+                .remainingDebt(loan.getRemainingPrincipal())
+                .build();
+        sendNotificationService.sendDebtLoan(loan.getUserId(),notificationRequest);
     }
     private BigDecimal lateDayCount(Loan loan){
         LocalDate dueDate = loan.getDueDate();
@@ -112,7 +125,7 @@ public class LoanService {
         return loanMapper.toLoanResponse(loan);
     }
     @Transactional
-    public LoanPaymentResponse payInstallment(LoanPaymentRequest request){
+    public LoanPaymentResponse payInstallment(LoanPaymentRequest request) throws JsonProcessingException {
         Loan loan = loanRepository.findById(request.getLoanId()).orElseThrow(()-> new AppException(ErrorCode.LOAN_NOT_EXISTED));
         if(loan.getRemainingPrincipal().equals(BigDecimal.ZERO))
             throw new AppException(ErrorCode.LOAN_PAID_OFF);
@@ -121,18 +134,27 @@ public class LoanService {
         loan.setRemainingPrincipal(loan.getRemainingPrincipal().subtract(monthlyPrincipal(loan))
                 .setScale(0,RoundingMode.CEILING));
         LoanPayment loanPayment = loanPaymentService.createLoanPayment(request);
-        return addLoanPaymentResponse(loan,loanPayment);
+        return addLoanPaymentResponse(loan,loanPayment, request.getAmount());
     }
-    private LoanPaymentResponse addLoanPaymentResponse(Loan loan, LoanPayment loanPayment){
+    private LoanPaymentResponse addLoanPaymentResponse(Loan loan, LoanPayment loanPayment, BigDecimal amount) throws JsonProcessingException {
         loan.getLoanPayments().add(loanPayment);
         loanRepository.save(loan);
-
+        List<String> registrationTokens = userService.getRegistrationTokens(loan.getUserId());
+        //send notification
+        MessageLoanRequest notificationRequest = MessageLoanRequest.builder()
+                .datePayment(LocalDateTime.now())
+                .amount(amount)
+                .paymentType("PAY")
+                .registrationTokens(registrationTokens)
+                .remainingDebt(loan.getRemainingPrincipal())
+                .build();
+        sendNotificationService.sendDebtLoan(loan.getId(),notificationRequest);
         LoanPaymentResponse loanPaymentResponse = loanPaymentMapper.toLoanPaymentResponse(loanPayment);
         loanPaymentResponse.setLoanId(loan.getId());
         return loanPaymentResponse;
     }
     @Transactional
-    public LoanPaymentResponse payLoanOff(LoanPaymentRequest request){
+    public LoanPaymentResponse payLoanOff(LoanPaymentRequest request) throws JsonProcessingException {
         Loan loan = loanRepository.findById(request.getLoanId()).orElseThrow(()-> new RuntimeException("Loan not existed"));
         if(loan.getRemainingPrincipal().equals(BigDecimal.ZERO))
             throw new AppException(ErrorCode.LOAN_PAID_OFF);
@@ -141,7 +163,7 @@ public class LoanService {
         loan.setRemainingPrincipal(BigDecimal.ZERO);
         loan.setStatus(LoanStatus.PAID.name());
         LoanPayment loanPayment = loanPaymentService.createLoanPayment(request);
-        return addLoanPaymentResponse(loan,loanPayment);
+        return addLoanPaymentResponse(loan,loanPayment, loan.getRemainingPrincipal());
     }
 
     public void isLate(Loan loan){
@@ -155,7 +177,13 @@ public class LoanService {
     }
     public void findLoanLate(){
         List<Loan> loans = loanRepository.findByDueDateBefore(LocalDate.now());
-        loans.forEach(this::updateLoanLate);
+        loans.forEach(loan -> {
+            try {
+                updateLoanLate(loan);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
 }

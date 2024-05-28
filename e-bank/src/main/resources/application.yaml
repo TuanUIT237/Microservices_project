@@ -14,8 +14,6 @@ spring:
     show-sql: true
   kafka:
     bootstrap-servers: localhost:9092
-    template:
-      default-topic: balance_account_change
 app:
   openfee: 100000
   min: 000000000
@@ -25,3 +23,7 @@ app:
   services:
     profile: http://localhost:8081/profile
     identity: http://localhost:8080/identity
+  kafka-topic:
+    balance_account_change: balance_account_change
+    credit_available_limit_change: credit_available_limit_change
+    debt_loan: debt_loan

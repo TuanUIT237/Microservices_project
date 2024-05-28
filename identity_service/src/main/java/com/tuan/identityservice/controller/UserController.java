@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserController {
     UserService userService;
+
     @PostMapping("/create")
     ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest request) {
         return ApiResponse.<UserResponse>builder()
@@ -44,7 +45,6 @@ public class UserController {
                 .result(userService.getUsers())
                 .build();
     }
-
 
     @GetMapping("/{userId}")
     ApiResponse<UserResponse> getUser(@PathVariable("userId") String userId) {
@@ -76,8 +76,9 @@ public class UserController {
                 .result("Users have been deleted")
                 .build();
     }
+
     @PostMapping("/registrationtokens")
-    public List<String> getRegistrationTokens(@RequestBody String userid){
+    public List<String> getRegistrationTokens(@RequestBody String userid) {
         return userService.getRegistrationToken(userid);
     }
 }

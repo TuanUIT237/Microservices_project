@@ -4,10 +4,10 @@ import com.google.firebase.messaging.*;
 import com.tuan.notificationservice.dto.notificationdto.MessageGlobalRequest;
 import com.tuan.notificationservice.dto.notificationdto.MessageGlobalResponse;
 import com.tuan.notificationservice.entity.MessageGlobal;
+
 import com.tuan.notificationservice.entity.MessageUser;
 import com.tuan.notificationservice.mapper.MessageGlobalMapper;
 import com.tuan.notificationservice.repository.MessageGlobalRepository;
-import com.tuan.notificationservice.repository.MessageUserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;

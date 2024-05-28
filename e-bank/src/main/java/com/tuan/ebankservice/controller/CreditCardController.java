@@ -1,5 +1,6 @@
 package com.tuan.ebankservice.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.tuan.ebankservice.dto.apiresponse.ApiResponse;
 import com.tuan.ebankservice.dto.creditcarddto.*;
 import com.tuan.ebankservice.mapper.CreditCardMapper;
@@ -41,17 +42,9 @@ public class CreditCardController {
                 .result(creditCardService.updateCreditCard(credit_card_id, request))
                 .build());
     }
-    @PostMapping("/add")
-    ResponseEntity<ApiResponse<CreditCardPaymentResponse>> addMoney(@RequestBody @Valid CreditCardAddRequest request){
-        return ResponseEntity.status(HttpStatus.OK).body(
-                ApiResponse.<CreditCardPaymentResponse>builder()
-                        .code(HttpStatus.OK.value())
-                        .message(HttpStatus.OK.name())
-                        .result(creditCardService.addLimit(request))
-                        .build());
-    }
+
     @PostMapping("/spend")
-    ResponseEntity<ApiResponse<CreditCardPaymentResponse>> spendMoney(@RequestBody @Valid CreditCardSpendRequest request){
+    ResponseEntity<ApiResponse<CreditCardPaymentResponse>> spendMoney(@RequestBody @Valid CreditCardSpendRequest request) throws JsonProcessingException {
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.<CreditCardPaymentResponse>builder()
                         .code(HttpStatus.OK.value())
@@ -60,7 +53,7 @@ public class CreditCardController {
                         .build());
     }
     @PostMapping("/refund")
-    ResponseEntity<ApiResponse<CreditCardPaymentResponse>> refundMoney(@RequestBody @Valid CreditCardRefundRequest request){
+    ResponseEntity<ApiResponse<CreditCardPaymentResponse>> refundMoney(@RequestBody @Valid CreditCardRefundRequest request) throws JsonProcessingException {
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.<CreditCardPaymentResponse>builder()
                         .code(HttpStatus.OK.value())

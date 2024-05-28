@@ -32,9 +32,13 @@ public class KafkaConsumerConfig {
 
     @Value("${spring.kafka.consumer.group-id}")
     private String kafkaGroupId;
-    @Value("${app.redis-topic.balance_account_change}")
+    @Value("${app.kafka-topic.balance_account_change}")
     private String balance_account_change;
-    @Value("${app.redis-topic.login}")
+    @Value("${app.kafka-topic.credit_available_limit_change}")
+    private String credit_available_limit_change;
+    @Value("${app.kafka-topic.debt_loan}")
+    private String debt_loan;
+    @Value("${app.kafka-topic.login}")
     private String login;
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory(){
@@ -72,6 +76,10 @@ public class KafkaConsumerConfig {
                 TopicBuilder.name(balance_account_change)
                         .build(),
                 TopicBuilder.name(login)
+                        .build(),
+                TopicBuilder.name(credit_available_limit_change)
+                        .build(),
+                TopicBuilder.name(debt_loan)
                         .build());
     }
 }

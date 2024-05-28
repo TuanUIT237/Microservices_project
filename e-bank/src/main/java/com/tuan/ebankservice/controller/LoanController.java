@@ -1,5 +1,6 @@
 package com.tuan.ebankservice.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.tuan.ebankservice.dto.apiresponse.ApiResponse;
 import com.tuan.ebankservice.dto.loandto.*;
 import com.tuan.ebankservice.service.LoanService;
@@ -36,7 +37,7 @@ public class LoanController {
                         .build());
     }
     @PostMapping("/loanoff")
-    ResponseEntity<ApiResponse<LoanPaymentResponse>> payLoanOff(@RequestBody @Valid LoanPaymentRequest request){
+    ResponseEntity<ApiResponse<LoanPaymentResponse>> payLoanOff(@RequestBody @Valid LoanPaymentRequest request) throws JsonProcessingException {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiResponse.<LoanPaymentResponse>builder()
                         .code(HttpStatus.OK.value())
@@ -45,7 +46,7 @@ public class LoanController {
                         .build());
     }
     @PostMapping("/payment")
-    ResponseEntity<ApiResponse<LoanPaymentResponse>> payInstallment(@RequestBody @Valid LoanPaymentRequest request){
+    ResponseEntity<ApiResponse<LoanPaymentResponse>> payInstallment(@RequestBody @Valid LoanPaymentRequest request) throws JsonProcessingException {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiResponse.<LoanPaymentResponse>builder()
                         .code(HttpStatus.OK.value())

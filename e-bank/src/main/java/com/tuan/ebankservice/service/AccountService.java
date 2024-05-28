@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.tuan.ebankservice.constant.PredefinedAccount;
 import com.tuan.ebankservice.constant.PredefinedTransaction;
 import com.tuan.ebankservice.dto.accountdto.*;
-import com.tuan.ebankservice.dto.notificationdto.MessageUserRequest;
+import com.tuan.ebankservice.dto.notificationdto.MessageAccountRequest;
 import com.tuan.ebankservice.dto.transactiondto.TransactionRequest;
 
 import com.tuan.ebankservice.dto.userprofiledto.ProfileGetUserIdRequest;
@@ -108,9 +108,9 @@ public class AccountService {
         if(account.getStatus().equals(AccountStatus.CANCEL.name()) || Objects.nonNull(account.getCancelDate()))
             throw new AppException(ErrorCode.ACCOUNT_CANCELED);
     }
-    public void updateBalanceAndSendMessage(Account account,BigDecimal amount, TransactionType transactionType) throws JsonProcessingException {
+    private void updateBalanceAndSendMessage(Account account,BigDecimal amount, TransactionType transactionType) throws JsonProcessingException {
         List<String> registrationTokens = userService.getRegistrationTokens(account.getUserId());
-        MessageUserRequest notificationRequest = MessageUserRequest.builder()
+        MessageAccountRequest notificationRequest = MessageAccountRequest.builder()
                 .datePayment(LocalDateTime.now())
                 .paymentType(transactionType.toString())
                 .amount(amount)
@@ -207,7 +207,7 @@ public class AccountService {
     }
     @Transactional
     public void receive(Account account, BigDecimal amount) throws JsonProcessingException {
-        MessageUserRequest notificationRequest = MessageUserRequest.builder()
+        MessageAccountRequest notificationRequest = MessageAccountRequest.builder()
                 .datePayment(LocalDateTime.now())
                 .paymentType(TransactionType.RECEIVE.toString())
                 .amount(amount)

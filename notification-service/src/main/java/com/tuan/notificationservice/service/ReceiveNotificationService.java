@@ -5,8 +5,10 @@ package com.tuan.notificationservice.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tuan.notificationservice.dto.emaildto.EmailDetailRequest;
-import com.tuan.notificationservice.dto.emaildto.MessageUserResponse;
+import com.tuan.notificationservice.dto.notificationdto.MessageAccountResponse;
 
+import com.tuan.notificationservice.dto.notificationdto.MessageCreditCardResponse;
+import com.tuan.notificationservice.dto.notificationdto.MessageLoanResponse;
 import com.tuan.notificationservice.dto.notificationdto.MessageLoginResponse;
 import com.tuan.notificationservice.entity.MessageUser;
 import lombok.AccessLevel;
@@ -31,12 +33,12 @@ public class ReceiveNotificationService {
     ObjectMapper kafkaObjectMapper;
     MessageService messageService;
     @KafkaListener(
-            topics = "${app.redis-topic.balance_account_change}",
+            topics = "${app.kafka-topic.balance_account_change}",
             groupId = "${spring.kafka.consumer.group-id}"
     )
-    public void listen(ConsumerRecord<String,String> record) throws JsonProcessingException {
-        MessageUserResponse notificationResponse =
-                kafkaObjectMapper.readValue(record.value(), MessageUserResponse.class);
+    public void listenBalanceChange(ConsumerRecord<String,String> record) throws JsonProcessingException {
+        MessageAccountResponse notificationResponse =
+                kafkaObjectMapper.readValue(record.value(), MessageAccountResponse.class);
         String operator = (notificationResponse.getPaymentType().equals("DEPOSIT")
                 || notificationResponse.getPaymentType().equals("RECEIVE")) ? "+" : "-";
         String body = "Balance change " + notificationResponse.getDatePayment() + " " + record.key() +": " + operator + notificationResponse.getAmount();
@@ -54,7 +56,7 @@ public class ReceiveNotificationService {
         messageService.pushNotification(messageUser);
     }
     @KafkaListener(
-            topics = "${app.redis-topic.login}",
+            topics = "${app.kafka-topic.login}",
             groupId = "${spring.kafka.consumer.group-id}"
     )
     public void listenLogin(ConsumerRecord<String,String> record) throws JsonProcessingException {
@@ -66,5 +68,38 @@ public class ReceiveNotificationService {
                 .messageBody("You have just signed in on the device")
                 .build();
         emailService.sendEmailAlert(emailDetailRequest);
+    }
+    @KafkaListener(
+            topics = "${app.kafka-topic.credit_available_limit_change}",
+            groupId = "${spring.kafka.consumer.group-id}"
+    )
+    public void listenAvailableLimit(ConsumerRecord<String,String> record) throws JsonProcessingException {
+        MessageCreditCardResponse notificationResponse =
+                kafkaObjectMapper.readValue(record.value(), MessageCreditCardResponse.class);
+        String body = "Credit card payment: " +
+                notificationResponse.getDatePayment() + " " +
+                record.key() +": -" +
+                notificationResponse.getAmount() + "\n" + "Available limit after payment: "+
+                notificationResponse.getAvailableLimit();
+        List<String> registrationTokens = notificationResponse.getRegistrationTokens();
+        log.info(body);
+        pushNotificationBalanceChange(body, registrationTokens);
+    }
+    @KafkaListener(
+            topics = "${app.kafka-topic.debt_loan}",
+            groupId = "${spring.kafka.consumer.group-id}"
+    )
+    public void listenDebtLoan(ConsumerRecord<String,String> record) throws JsonProcessingException {
+        MessageLoanResponse notificationResponse =
+                kafkaObjectMapper.readValue(record.value(), MessageLoanResponse.class);
+        String operator = notificationResponse.getPaymentType().equals("LATE") ? "+" : "-";
+        String body = "Update principal" +
+                notificationResponse.getDatePayment() + " " +
+                record.key() +": " + operator +
+                notificationResponse.getAmount() + "\n" +
+                notificationResponse.getRemainingDebt();
+        List<String> registrationTokens = notificationResponse.getRegistrationTokens();
+        log.info(body);
+        pushNotificationBalanceChange(body, registrationTokens);
     }
 }

@@ -1,8 +1,10 @@
 package com.tuan.ebankservice.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.tuan.ebankservice.constant.PredefinedCreditCard;
 import com.tuan.ebankservice.dto.creditcarddto.*;
-import com.tuan.ebankservice.dto.userdto.UserCreationRequest;
+import com.tuan.ebankservice.dto.notificationdto.MessageAccountRequest;
+import com.tuan.ebankservice.dto.notificationdto.MessageCreditCardRequest;
 import com.tuan.ebankservice.dto.userprofiledto.ProfileGetUserIdRequest;
 import com.tuan.ebankservice.entity.CreditCard;
 import com.tuan.ebankservice.entity.CreditCardPayment;
@@ -10,10 +12,8 @@ import com.tuan.ebankservice.exception.AppException;
 import com.tuan.ebankservice.exception.ErrorCode;
 import com.tuan.ebankservice.mapper.CreditCardMapper;
 import com.tuan.ebankservice.mapper.CreditCardPaymentMapper;
-
 import com.tuan.ebankservice.repository.CreditCardRepository;
 import com.tuan.ebankservice.repository.httpclient.ProfileClient;
-import com.tuan.ebankservice.repository.httpclient.UserClient;
 import com.tuan.ebankservice.util.CreditCardStatus;
 import com.tuan.ebankservice.util.CreditPaymentType;
 import com.tuan.ebankservice.util.StringUtil;
@@ -26,16 +26,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-
 import java.math.BigDecimal;
-import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-
-import java.time.Month;
-import java.time.Year;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -53,6 +48,7 @@ public class CreditCardService {
     CreditCardPaymentMapper creditCardPaymentMapper;
     ProfileClient profileClient;
     UserService userService;
+    SendNotificationService sendNotificationService;
 
     public CreditCard getCreditCard(String id){
         return creditCardRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.CREDIT_CARD_NOT_EXISTED)
@@ -115,7 +111,7 @@ public class CreditCardService {
             throw new RuntimeException("You are in debt is " + creditCard.getCurrentDebt());
     }
     @Transactional
-    public CreditCardPaymentResponse spendMoney(CreditCardSpendRequest request){
+    public CreditCardPaymentResponse spendMoney(CreditCardSpendRequest request) throws JsonProcessingException {
         CreditCard creditCard = getCreditCard(request.getCreditCardId());
         //Check Cvv
         checkCvv(creditCard,request.getCvvNo());
@@ -140,40 +136,25 @@ public class CreditCardService {
                         .amount(request.getAmount())
                         .build(), CreditPaymentType.SPEND.toString());
 
-        return addCreditCardPayment(creditCard, creditCardPayment);
+        return addCreditCardPayment(creditCard, creditCardPayment, request.getAmount());
     }
+
     @Transactional
-    public CreditCardPaymentResponse addLimit(CreditCardAddRequest request){
-        CreditCard creditCard = getCreditCard(request.getCreditCardId());
-        //Check Cvv
-        checkCvv(creditCard,request.getCvvNo());
-        //Check expired date
-        checkExpiredDate(creditCard);
-        //check limit
-        checkLimited(creditCard);
-        // check cancelled
-        checkCancelled(creditCard);
-
-        creditCard.setCurrentDebt(creditCard.getCurrentDebt().subtract(request.getAmount())
-                .setScale(0,RoundingMode.CEILING)
-        );
-        creditCard.setAvailableLimit(creditCard.getAvailableLimit().add(request.getAmount())
-                .setScale(0,RoundingMode.CEILING)
-        );
-
-
-        CreditCardPayment creditCardPayment = creditCardPaymentService.createCreditCardPayment(
-                CreditCardPaymentRequest.builder()
-                        .description(request.getDescription())
-                        .amount(request.getAmount())
-                        .build(), CreditPaymentType.ADD.toString());
-
-        return addCreditCardPayment(creditCard, creditCardPayment);
-    }
-    @Transactional
-    public CreditCardPaymentResponse addCreditCardPayment(CreditCard creditCard, CreditCardPayment creditCardPayment) {
+    public CreditCardPaymentResponse addCreditCardPayment(
+            CreditCard creditCard, CreditCardPayment creditCardPayment, BigDecimal amount)
+            throws JsonProcessingException {
         creditCard.getCreditCardPayments().add(creditCardPayment);
         creditCardRepository.save(creditCard);
+        //send notification
+        List<String> registrationTokens = userService.getRegistrationTokens(creditCard.getUserId());
+        MessageCreditCardRequest notificationRequest = MessageCreditCardRequest.builder()
+                .datePayment(LocalDateTime.now())
+                .paymentType(creditCardPayment.getPaymentType())
+                .amount(amount)
+                .registrationTokens(registrationTokens)
+                .availableLimit(creditCard.getAvailableLimit())
+                .build();
+        sendNotificationService.sendAvailableLimit(creditCard.getId(),notificationRequest);
         CreditCardPaymentResponse creditCardPaymentResponse =
                 creditCardPaymentMapper.toCreditCardPaymentResponse(creditCardPayment);
         creditCardPaymentResponse.setCreditCardId(creditCard.getId());
@@ -190,7 +171,7 @@ public class CreditCardService {
         return creditCardMapper.toCreditCardResponse(creditCard);
     }
     @Transactional
-    public CreditCardPaymentResponse refundMoney(CreditCardRefundRequest request){
+    public CreditCardPaymentResponse refundMoney(CreditCardRefundRequest request) throws JsonProcessingException {
         CreditCardPayment oldCreditCardPayment = creditCardPaymentService.getCreditCardPayment(request.getCreditCardPaymentId());
         CreditCard creditCard = getCreditCard(creditCardPaymentService.getCreditCardId(oldCreditCardPayment.getId()));
         //Check expired date
@@ -205,7 +186,7 @@ public class CreditCardService {
                 .amount(oldCreditCardPayment.getAmount())
                 .build(),CreditPaymentType.REFUND.name());
 
-        return addCreditCardPayment(creditCard, creditCardPayment);
+        return addCreditCardPayment(creditCard, creditCardPayment, oldCreditCardPayment.getAmount());
     }
     public String cancelCreditCard(String id){
         CreditCard creditCard = getCreditCard(id);

@@ -72,4 +72,9 @@ public class UserProfileService {
         userProfileRepository.deleteById(id);
         return "Profile has been deleted";
     }
+
+    public UserProfileResponse getProfileBtUserId(String userId){
+        UserProfile userProfile = userProfileRepository.findByUserId(userId);
+        return userProfileMapper.toUserProfileResponse(userProfile);
+    }
 }

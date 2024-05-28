@@ -3,6 +3,8 @@ package com.tuan.notificationservice.service;
 
 
 import com.tuan.notificationservice.dto.emaildto.EmailDetailRequest;
+import com.tuan.notificationservice.exception.AppException;
+import com.tuan.notificationservice.exception.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
