@@ -1,11 +1,9 @@
 package com.tuan.ebankservice.dto.transactiondto;
 
-import com.tuan.ebankservice.validator.BigDecimalLength;
-import jakarta.validation.constraints.Min;
+import java.math.BigDecimal;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.math.BigDecimal;
 
 @Data
 @NoArgsConstructor

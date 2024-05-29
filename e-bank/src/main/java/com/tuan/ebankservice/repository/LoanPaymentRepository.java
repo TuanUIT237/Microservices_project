@@ -1,9 +1,9 @@
 package com.tuan.ebankservice.repository;
 
-import com.tuan.ebankservice.entity.LoanPayment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import com.tuan.ebankservice.entity.LoanPayment;
+
 @Repository
-public interface LoanPaymentRepository extends JpaRepository<LoanPayment, String> {
-}
+public interface LoanPaymentRepository extends JpaRepository<LoanPayment, String> {}

@@ -1,13 +1,13 @@
 package com.tuan.ebankservice.dto.creditcarddto;
 
-import com.tuan.ebankservice.util.CreditPaymentType;
-import com.tuan.ebankservice.validator.BigDecimalLength;
+import java.math.BigDecimal;
+
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+
+import com.tuan.ebankservice.validator.BigDecimalLength;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.math.BigDecimal;
 
 @Data
 @NoArgsConstructor(force = true)
@@ -17,7 +17,9 @@ import java.math.BigDecimal;
 public class CreditCardPaymentRequest {
     @NotBlank(message = "CREDIT_CARD_ID_INVALID")
     String creditCardId;
-    @BigDecimalLength(min = 10000,message = "AMOUNT_INVALID")
+
+    @BigDecimalLength(min = 10000, message = "AMOUNT_INVALID")
     BigDecimal amount;
+
     String description;
 }

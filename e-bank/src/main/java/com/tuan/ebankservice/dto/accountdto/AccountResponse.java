@@ -1,11 +1,11 @@
 package com.tuan.ebankservice.dto.accountdto;
 
+import java.math.BigDecimal;
+
 import com.tuan.ebankservice.util.AccountStatus;
-import com.tuan.ebankservice.validator.BigDecimalLength;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.math.BigDecimal;
 
 @Data
 @NoArgsConstructor

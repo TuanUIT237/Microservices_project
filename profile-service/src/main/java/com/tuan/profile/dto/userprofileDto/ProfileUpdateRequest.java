@@ -10,10 +10,12 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+
 public class ProfileUpdateRequest {
-    String id;
+    String userId;
     String firstName;
     String email;
+    String phone;
     String lastName;
     String citizenIdCard;
     LocalDate dob;

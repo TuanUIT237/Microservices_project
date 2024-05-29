@@ -11,7 +11,6 @@ import com.tuan.identityservice.dto.APIRespone.ApiResponse;
 import com.tuan.identityservice.dto.UserDto.UserCreationRequest;
 import com.tuan.identityservice.dto.UserDto.UserResponse;
 import com.tuan.identityservice.dto.UserDto.UserUpdateRequest;
-import com.tuan.identityservice.dto.UserDto.UsersDeleteRequest;
 import com.tuan.identityservice.service.UserService;
 
 import lombok.AccessLevel;
@@ -32,6 +31,14 @@ public class UserController {
         return ApiResponse.<UserResponse>builder()
                 .status("success")
                 .result(userService.createUser(request))
+                .build();
+    }
+
+    @GetMapping("/userinfo")
+    ApiResponse<UserResponse> getUserInfo() {
+        return ApiResponse.<UserResponse>builder()
+                .status("success")
+                .result(userService.getUserInfo())
                 .build();
     }
 
@@ -59,17 +66,9 @@ public class UserController {
         return userService.updateUser(request);
     }
 
-    @DeleteMapping("/{userId}")
-    ApiResponse<String> deleteUser(@PathVariable String userId) {
-        userService.deleteUser(userId);
-        return ApiResponse.<String>builder()
-                .status("success")
-                .result("User has been deleted")
-                .build();
-    }
 
-    @PostMapping("/delete")
-    ApiResponse<String> deleteUsers(@RequestBody UsersDeleteRequest request) {
+    @DeleteMapping("/delete")
+    ApiResponse<String> deleteUsers(@RequestBody List<String> request) {
         userService.deleteUsers(request);
         return ApiResponse.<String>builder()
                 .status("success")

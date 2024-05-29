@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import com.tuan.profile.dto.userprofileDto.ProfileUpdateRequest;
 import com.tuan.profile.dto.userprofileDto.UserProfileResponse;
 import com.tuan.profile.service.UserProfileService;
 
@@ -30,8 +31,13 @@ public class UserProfileController {
         return userProfileService.getProfiles();
     }
 
-    @DeleteMapping("/{profileid}")
-    String deleteProfile(@PathVariable String profileid) {
-        return userProfileService.deleteProfile(profileid);
+    @PutMapping("/update")
+    UserProfileResponse updateProfiles(@RequestBody ProfileUpdateRequest request) {
+        return userProfileService.updateProfile(request);
+    }
+
+    @DeleteMapping("/delete")
+    String deleteProfiles(@RequestBody List<String> request) {
+        return userProfileService.deleteProfile(request);
     }
 }

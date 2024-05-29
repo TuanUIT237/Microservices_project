@@ -1,16 +1,14 @@
 package com.tuan.ebankservice.entity;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
+
+import org.hibernate.annotations.CreationTimestamp;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.hibernate.annotations.CreationTimestamp;
-import org.springframework.format.annotation.DateTimeFormat;
-
-
-import java.math.BigDecimal;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Data
@@ -22,9 +20,12 @@ public class CreditCardPayment {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
+
     BigDecimal amount;
+
     @CreationTimestamp
     LocalDateTime paymentDate;
+
     String description;
     String paymentType;
 }

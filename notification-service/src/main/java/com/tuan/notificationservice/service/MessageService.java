@@ -8,6 +8,7 @@ import com.tuan.notificationservice.entity.MessageGlobal;
 import com.tuan.notificationservice.entity.MessageUser;
 import com.tuan.notificationservice.mapper.MessageGlobalMapper;
 import com.tuan.notificationservice.repository.MessageGlobalRepository;
+import com.tuan.notificationservice.repository.MessageUserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -15,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +24,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE,makeFinal = true)
 public class MessageService {
     MessageGlobalRepository messageGlobalRepository;
+    MessageUserRepository messageUserRepository;
     MessageGlobalMapper messageGlobalMapper;
     FirebaseMessaging firebaseMessaging;
     public MessageGlobalResponse createNotification(MessageGlobalRequest request){
@@ -44,11 +47,21 @@ public class MessageService {
                 .addAllTokens(registrationTokens)
                 .setNotification(notification)
                 .build();
+        BatchResponse batchResponse = null;
         try {
-            firebaseMessaging.sendMulticast(multicastMessage);
+            batchResponse = firebaseMessaging.sendMulticast(multicastMessage);
         } catch (FirebaseMessagingException e) {
             log.info("Firebase error {}", e.getMessage());
         }
+        if(batchResponse.getFailureCount()>0){
+            List<SendResponse> responses = batchResponse.getResponses();
+            for(int i = 0; i < responses.size(); i++){
+                if(!responses.get(i).isSuccessful()){
+                    registrationTokens.remove(i);
+                }
+            }
+        }
+        messageUserRepository.save(message);
     }
     public void pushNotificationGlobal(MessageGlobal messageGlobal) {
         Notification notification = Notification.builder()

@@ -1,7 +1,7 @@
 package com.tuan.ebankservice.dto.creditcarddto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -13,5 +13,6 @@ import lombok.experimental.FieldDefaults;
 public class CreditCardRefundRequest {
     @NotBlank(message = "CREDIT_PAYMENT_ID_INVALID")
     String creditCardPaymentId;
+
     String description;
 }

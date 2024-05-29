@@ -10,8 +10,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class EBankServiceApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(EBankServiceApplication.class, args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(EBankServiceApplication.class, args);
+    }
 }

@@ -1,21 +1,17 @@
-package com.tuan.identityservice.dto.UserDto;
+package com.tuan.identityservice.dto.ProfileDto;
 
 import java.time.LocalDate;
-import java.util.Set;
-
-import com.tuan.identityservice.entity.Role;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserResponse {
-    String id;
-    String username;
+public class ProfileUpdateRequest {
+    String userId;
     String firstName;
     String lastName;
     String phone;
@@ -23,5 +19,4 @@ public class UserResponse {
     String citizenIdCard;
     LocalDate dob;
     String city;
-    Set<Role> roles;
 }

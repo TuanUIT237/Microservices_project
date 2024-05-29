@@ -1,14 +1,13 @@
 package com.tuan.ebankservice.entity;
 
-import com.tuan.ebankservice.util.LoanStatus;
-import jakarta.persistence.*;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
-import org.springframework.data.annotation.CreatedDate;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
+
+import jakarta.persistence.*;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Entity
 @Data
@@ -20,6 +19,7 @@ public class Loan {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
+
     String userId;
     Integer installmentCount;
     BigDecimal principalLoanAmount;
@@ -29,9 +29,8 @@ public class Loan {
     BigDecimal remainingPrincipal;
     LocalDate dueDate;
     String status;
-    @OneToMany(
-            cascade = CascadeType.ALL,
-            orphanRemoval = true)
-    @JoinColumn(name="loan_id")
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "loan_id")
     Set<LoanPayment> loanPayments;
 }

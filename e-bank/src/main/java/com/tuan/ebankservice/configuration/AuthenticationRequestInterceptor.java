@@ -1,10 +1,11 @@
 package com.tuan.ebankservice.configuration;
 
-import feign.RequestInterceptor;
-import feign.RequestTemplate;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+
+import feign.RequestInterceptor;
+import feign.RequestTemplate;
 
 public class AuthenticationRequestInterceptor implements RequestInterceptor {
     @Override

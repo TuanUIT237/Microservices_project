@@ -8,8 +8,6 @@ import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.UUID;
 
-import com.tuan.identityservice.dto.ProfileDto.UserProfileResponse;
-import com.tuan.identityservice.repository.httpcilent.ProfileCilent;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -24,6 +22,7 @@ import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.tuan.identityservice.dto.AutheticationDto.*;
+import com.tuan.identityservice.dto.ProfileDto.UserProfileResponse;
 import com.tuan.identityservice.dto.notificationdto.MessageLoginRequest;
 import com.tuan.identityservice.entity.InvalidatedToken;
 import com.tuan.identityservice.entity.User;
@@ -31,6 +30,7 @@ import com.tuan.identityservice.exception.AppException;
 import com.tuan.identityservice.exception.ErrorCode;
 import com.tuan.identityservice.repository.InvalidatedTokenRepository;
 import com.tuan.identityservice.repository.UserRepository;
+import com.tuan.identityservice.repository.httpcilent.ProfileCilent;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -48,6 +48,7 @@ public class AuthenticationService {
     RedisTemplate<String, String> redisTemplate;
     SendNotificationService sendNotificationService;
     ProfileCilent profileCilent;
+
     @NonFinal
     @Value("${jwt.signerKey}")
     protected String SIGNER_KEY;
@@ -79,18 +80,20 @@ public class AuthenticationService {
         boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
         if (!authenticated) throw new AppException(ErrorCode.UNAUTHENTICATED);
         var token = generateToken(user);
-        UserProfileResponse userProfileResponse = profileCilent.getProfileByUserId(user.getId());
-        log.info(userProfileResponse.toString());
-        String key = String.format("userid: %s", user.getId());
-        if (!Objects.isNull(redisTemplate.opsForValue().get(key))) throw new AppException(ErrorCode.ONE_ACCOUNT_LOGIN);
-        redisTemplate.opsForValue().set(key, token);
-        log.info(key + " " + redisTemplate.opsForValue().get(key));
-        MessageLoginRequest messageLoginRequest =
-                MessageLoginRequest.builder()
-                        .email(userProfileResponse.getEmail())
-                        .phone(userProfileResponse.getPhone())
-                        .build();
-        sendNotificationService.sendLoginMessage(user.getId(), messageLoginRequest);
+        if (!user.getUsername().equals("admin")) {
+            UserProfileResponse userProfileResponse = profileCilent.getProfileByUserId(user.getId());
+            log.info(userProfileResponse.toString());
+            String key = String.format("userid: %s", user.getId());
+            if (!Objects.isNull(redisTemplate.opsForValue().get(key)))
+                throw new AppException(ErrorCode.ONE_ACCOUNT_LOGIN);
+            redisTemplate.opsForValue().set(key, token);
+            log.info(key + " " + redisTemplate.opsForValue().get(key));
+            MessageLoginRequest messageLoginRequest = MessageLoginRequest.builder()
+                    .email(userProfileResponse.getEmail())
+                    .phone(userProfileResponse.getPhone())
+                    .build();
+            sendNotificationService.sendLoginMessage(user.getId(), messageLoginRequest);
+        }
         return AuthenticationResponse.builder().token(token).build();
     }
 

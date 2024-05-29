@@ -1,13 +1,12 @@
 package com.tuan.ebankservice.repository;
 
-import com.tuan.ebankservice.dto.loandto.LoanResponse;
-import com.tuan.ebankservice.entity.Loan;
-import org.springframework.cglib.core.Local;
+import java.time.LocalDate;
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
-import java.util.List;
+import com.tuan.ebankservice.entity.Loan;
 
 @Repository
 public interface LoanRepository extends JpaRepository<Loan, String> {

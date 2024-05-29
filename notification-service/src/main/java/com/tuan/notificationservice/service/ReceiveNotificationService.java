@@ -39,16 +39,17 @@ public class ReceiveNotificationService {
     public void listenBalanceChange(ConsumerRecord<String,String> record) throws JsonProcessingException {
         MessageAccountResponse notificationResponse =
                 kafkaObjectMapper.readValue(record.value(), MessageAccountResponse.class);
+        String title ="Balance change";
         String operator = (notificationResponse.getPaymentType().equals("DEPOSIT")
                 || notificationResponse.getPaymentType().equals("RECEIVE")) ? "+" : "-";
         String body = "Balance change " + notificationResponse.getDatePayment() + " " + record.key() +": " + operator + notificationResponse.getAmount();
         List<String> registrationTokens = notificationResponse.getRegistrationTokens();
         log.info(body);
-        pushNotificationBalanceChange(body, registrationTokens);
+        pushNotificationBalanceChange(title, body, registrationTokens);
     }
-    public void pushNotificationBalanceChange(String body, List<String> registrationTokens){
+    public void pushNotificationBalanceChange(String title, String body, List<String> registrationTokens){
         MessageUser messageUser = MessageUser.builder()
-                .title("Balance change")
+                .title(title)
                 .body(body)
                 .image("uri image")
                 .registrationTokens(registrationTokens)
@@ -81,9 +82,10 @@ public class ReceiveNotificationService {
                 record.key() +": -" +
                 notificationResponse.getAmount() + "\n" + "Available limit after payment: "+
                 notificationResponse.getAvailableLimit();
+        String title = "Notification about available limit";
         List<String> registrationTokens = notificationResponse.getRegistrationTokens();
         log.info(body);
-        pushNotificationBalanceChange(body, registrationTokens);
+        pushNotificationBalanceChange(title, body, registrationTokens);
     }
     @KafkaListener(
             topics = "${app.kafka-topic.debt_loan}",
@@ -93,6 +95,7 @@ public class ReceiveNotificationService {
         MessageLoanResponse notificationResponse =
                 kafkaObjectMapper.readValue(record.value(), MessageLoanResponse.class);
         String operator = notificationResponse.getPaymentType().equals("LATE") ? "+" : "-";
+        String title = "Notification about remaining debt";
         String body = "Update principal" +
                 notificationResponse.getDatePayment() + " " +
                 record.key() +": " + operator +
@@ -100,6 +103,6 @@ public class ReceiveNotificationService {
                 notificationResponse.getRemainingDebt();
         List<String> registrationTokens = notificationResponse.getRegistrationTokens();
         log.info(body);
-        pushNotificationBalanceChange(body, registrationTokens);
+        pushNotificationBalanceChange(title,body, registrationTokens);
     }
 }

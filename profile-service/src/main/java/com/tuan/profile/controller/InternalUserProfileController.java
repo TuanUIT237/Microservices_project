@@ -27,12 +27,14 @@ public class InternalUserProfileController {
     String getUserId(@RequestBody ProfileGetUserIdRequest request) {
         return userProfileService.findUserIdByName(request);
     }
+
     @PostMapping("/emailvalid")
-    boolean emailExisted(@RequestBody String email){
+    boolean emailExisted(@RequestBody String email) {
         return userProfileService.findEmailExisted(email);
     }
+
     @PostMapping("/user")
-    UserProfileResponse getProfileByUserId(@RequestBody String userId){
+    UserProfileResponse getProfileByUserId(@RequestBody String userId) {
         return userProfileService.getProfileBtUserId(userId);
     }
 }

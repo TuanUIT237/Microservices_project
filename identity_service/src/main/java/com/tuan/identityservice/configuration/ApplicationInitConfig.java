@@ -28,10 +28,10 @@ public class ApplicationInitConfig {
     RoleRepository roleRepository;
 
     @NonFinal
-    static final String ADMIN_USER_NAME = "admin";
+    static final String ADMIN_USER_NAME = "ADMIN";
 
     @NonFinal
-    static final String ADMIN_PASSWORD = "admin";
+    static final String ADMIN_PASSWORD = "ADMIN";
 
     @Bean
     ApplicationRunner applicationRunner(UserRepository userRepository) {
