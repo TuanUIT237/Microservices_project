@@ -1,5 +1,6 @@
 package com.tuan.identityservice.service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -39,7 +40,6 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class UserService {
     UserRepository userRepository;
-    RoleRepository roleRepository;
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
     ProfileCilent profileCilent;
@@ -90,15 +90,12 @@ public class UserService {
         return userResponse;
     }
 
-
-    @PreAuthorize("hasRole('ADMIN')")
     public List<UserResponse> getUsers() {
         return userRepository.findAll().stream()
                 .map((userMapper::toUserResponse))
                 .toList();
     }
 
-    @PostAuthorize("returnObject.username==authentication.name")
     public UserResponse getUser(String id) {
         UserResponse userResponse = userMapper.toUserResponse(
                 userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found")));
@@ -106,9 +103,18 @@ public class UserService {
         return userResponse;
     }
     @Transactional
-    public void deleteUsers(List<String> request) {
-        profileCilent.deleteProfiles(request);
-        request.forEach(userRepository::deleteById);
+    public List<String> deleteUsers(List<String> request) {
+        List<String> deleteUserSuccess = new ArrayList<>();
+        request.forEach(id ->{
+            boolean isFound;
+            isFound = userRepository.existsById(id);
+            if(isFound){
+                userRepository.deleteById(id);
+                deleteUserSuccess.add(id);
+            }
+        });
+        profileCilent.deleteProfiles(deleteUserSuccess);
+        return deleteUserSuccess;
     }
 
     public List<String> getRegistrationToken(String userId) {

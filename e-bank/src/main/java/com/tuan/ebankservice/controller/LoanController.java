@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -21,7 +22,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class LoanController {
     LoanService loanService;
-
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     @PostMapping("/create")
     ResponseEntity<ApiResponse<LoanResponse>> createLoan(@RequestBody @Valid LoanCreationRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -31,7 +32,7 @@ public class LoanController {
                         .result(loanService.createLoan(request))
                         .build());
     }
-
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     @GetMapping("/{loanid}")
     ResponseEntity<ApiResponse<LoanResponse>> getLoan(@PathVariable String loanid) {
         return ResponseEntity.status(HttpStatus.FOUND)
@@ -41,7 +42,7 @@ public class LoanController {
                         .result(loanService.getLoan(loanid))
                         .build());
     }
-
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     @PostMapping("/loanoff")
     ResponseEntity<ApiResponse<LoanPaymentResponse>> payLoanOff(@RequestBody @Valid LoanPaymentRequest request)
             throws JsonProcessingException {
@@ -52,7 +53,7 @@ public class LoanController {
                         .result(loanService.payLoanOff(request))
                         .build());
     }
-
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     @PostMapping("/payment")
     ResponseEntity<ApiResponse<LoanPaymentResponse>> payInstallment(@RequestBody @Valid LoanPaymentRequest request)
             throws JsonProcessingException {
@@ -63,7 +64,7 @@ public class LoanController {
                         .result(loanService.payInstallment(request))
                         .build());
     }
-
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     @PutMapping("/update/{loan_id}")
     ResponseEntity<ApiResponse<LoanResponse>> updateLoan(
             @PathVariable String loan_id, @RequestBody @Valid LoanUpdateRequest request) {

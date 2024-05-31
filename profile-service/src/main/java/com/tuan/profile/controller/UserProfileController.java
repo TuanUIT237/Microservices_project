@@ -25,19 +25,21 @@ public class UserProfileController {
         return userProfileService.getProfile(profileid);
     }
 
-    @PreAuthorize("hasRole('admin')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/")
     List<UserProfileResponse> getProfiles() {
         return userProfileService.getProfiles();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/update")
     UserProfileResponse updateProfiles(@RequestBody ProfileUpdateRequest request) {
         return userProfileService.updateProfile(request);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/delete")
-    String deleteProfiles(@RequestBody List<String> request) {
-        return userProfileService.deleteProfile(request);
+    void deleteProfiles(@RequestBody List<String> request) {
+        userProfileService.deleteProfile(request);
     }
 }

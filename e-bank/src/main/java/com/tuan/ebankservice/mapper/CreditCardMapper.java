@@ -7,8 +7,9 @@ import com.tuan.ebankservice.dto.creditcarddto.CreditCardCreationRequest;
 import com.tuan.ebankservice.dto.creditcarddto.CreditCardResponse;
 import com.tuan.ebankservice.dto.creditcarddto.CreditCardUpdateRequest;
 import com.tuan.ebankservice.entity.CreditCard;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface CreditCardMapper {
     CreditCard toCreditCard(CreditCardCreationRequest request);
 

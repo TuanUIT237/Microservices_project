@@ -1,4 +1,4 @@
-package com.tuan.identityservice.configuration;
+package com.tuan.notificationservice.configuration;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -22,12 +22,6 @@ public class SecurityConfig {
     private CustomJwtDecoder customJwtDecoder;
 
     private final String[] PUBLIC_ENDPOINTS = {
-        "/auth/login",
-        "/auth/token",
-        "/auth/refresh",
-        "/auth/logout",
-        "/users/create",
-        "/users/registration-tokens"
     };
 
     @Bean

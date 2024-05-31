@@ -7,8 +7,9 @@ import com.tuan.ebankservice.dto.loandto.LoanCreationRequest;
 import com.tuan.ebankservice.dto.loandto.LoanResponse;
 import com.tuan.ebankservice.dto.loandto.LoanUpdateRequest;
 import com.tuan.ebankservice.entity.Loan;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface LoanMapper {
     Loan toLoan(LoanCreationRequest request);
 

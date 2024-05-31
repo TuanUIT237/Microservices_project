@@ -7,6 +7,7 @@ import com.tuan.notificationservice.service.MessageService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,10 +18,12 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE,makeFinal = true)
 public class MessageController {
     MessageService messageService;
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     @PostMapping("/create")
     MessageGlobalResponse createNotification(@RequestBody MessageGlobalRequest request){
         return messageService.createNotification(request);
     }
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     @GetMapping("/")
     List<MessageGlobalResponse> getNotifications(){
         return messageService.getNotifications();

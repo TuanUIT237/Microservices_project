@@ -28,10 +28,10 @@ public class ApplicationInitConfig {
     RoleRepository roleRepository;
 
     @NonFinal
-    static final String ADMIN_USER_NAME = "ADMIN";
+    static final String ADMIN_USER_NAME = "admin";
 
     @NonFinal
-    static final String ADMIN_PASSWORD = "ADMIN";
+    static final String ADMIN_PASSWORD = "admin";
 
     @Bean
     ApplicationRunner applicationRunner(UserRepository userRepository) {
@@ -40,7 +40,8 @@ public class ApplicationInitConfig {
                 var roles = new HashSet<Role>();
                 roleRepository.save(
                         Role.builder().name(PredefinedRole.USER_ROLE).build());
-
+                roleRepository.save(
+                        Role.builder().name(PredefinedRole.EMPLOYEE_ROLE).build());
                 Role adminRole = Role.builder().name(PredefinedRole.ADMIN_ROLE).build();
                 roleRepository.save(adminRole);
 

@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -25,7 +26,7 @@ import lombok.experimental.FieldDefaults;
 public class CreditCardController {
     CreditCardService creditCardService;
     CreditCardMapper creditCardMapper;
-
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     @PostMapping("/create")
     ResponseEntity<ApiResponse<CreditCardResponse>> createCreditCard(
             @RequestBody @Valid CreditCardCreationRequest request) {
@@ -36,7 +37,7 @@ public class CreditCardController {
                         .result(creditCardService.createCreditCard(request))
                         .build());
     }
-
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     @PutMapping("/update/{credit_card_id}")
     ResponseEntity<ApiResponse<CreditCardResponse>> updateCreditCard(
             @PathVariable String credit_card_id, @RequestBody @Valid CreditCardUpdateRequest request) {
@@ -47,7 +48,7 @@ public class CreditCardController {
                         .result(creditCardService.updateCreditCard(credit_card_id, request))
                         .build());
     }
-
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
     @PostMapping("/spend")
     ResponseEntity<ApiResponse<CreditCardPaymentResponse>> spendMoney(
             @RequestBody @Valid CreditCardSpendRequest request) throws JsonProcessingException {
@@ -58,7 +59,7 @@ public class CreditCardController {
                         .result(creditCardService.spendMoney(request))
                         .build());
     }
-
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     @PostMapping("/refund")
     ResponseEntity<ApiResponse<CreditCardPaymentResponse>> refundMoney(
             @RequestBody @Valid CreditCardRefundRequest request) throws JsonProcessingException {
@@ -69,7 +70,7 @@ public class CreditCardController {
                         .result(creditCardService.refundMoney(request))
                         .build());
     }
-
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE','USER')")
     @GetMapping("/{creditcardid}")
     ResponseEntity<ApiResponse<CreditCardResponse>> getCreditCard(@PathVariable @Valid String creditcardid) {
         return ResponseEntity.status(HttpStatus.FOUND)
@@ -79,7 +80,7 @@ public class CreditCardController {
                         .result(creditCardMapper.toCreditCardResponse(creditCardService.getCreditCard(creditcardid)))
                         .build());
     }
-
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     @GetMapping("/")
     ResponseEntity<ApiResponse<List<CreditCardResponse>>> getAllCreditCards() {
         return ResponseEntity.status(HttpStatus.FOUND)
@@ -89,7 +90,7 @@ public class CreditCardController {
                         .result(creditCardService.getAllCreditCards())
                         .build());
     }
-
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     @GetMapping("/history-payment")
     ResponseEntity<ApiResponse<List<CreditCardPaymentResponse>>> historyPayment(
             @RequestBody @Valid CreditPaymentHistoryRequest request) {
@@ -100,7 +101,7 @@ public class CreditCardController {
                         .result(creditCardService.findCreditCardPaymentByDate(request))
                         .build());
     }
-
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     @PutMapping("/cancel/{creditcardid}")
     ResponseEntity<ApiResponse<String>> cancelCreditCard(@PathVariable String creditcardid) {
         return ResponseEntity.status(HttpStatus.OK)

@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import com.tuan.ebankservice.dto.creditcarddto.CreditCardPaymentRequest;
@@ -25,7 +26,7 @@ import lombok.experimental.FieldDefaults;
 public class CreditCardPaymentService {
     CreditCardPaymentRepository creditCardPaymentRepository;
     CreditCardPaymentMapper creditCardPaymentMapper;
-
+    @Transactional
     public CreditCardPayment createCreditCardPayment(CreditCardPaymentRequest request, String type) {
         CreditCardPayment creditCardPayment = CreditCardPayment.builder()
                 .description(request.getDescription())

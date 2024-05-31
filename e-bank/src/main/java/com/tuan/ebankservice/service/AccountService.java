@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
+import com.tuan.ebankservice.dto.userdto.UserCreationRequest;
 import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -43,7 +44,6 @@ public class AccountService {
     AccountMapper accountMapper;
     TransactionService transactionService;
     SendNotificationService sendNotificationService;
-    ProfileClient profileClient;
     UserService userService;
 
     @NonFinal
@@ -57,14 +57,14 @@ public class AccountService {
                 .citizenIdCard(request.getCitizenIdCard())
                 .fullName(request.getName())
                 .build();
-        String userId = profileClient.getUserId(profileGetUserIdRequest);
-        String passwordRandom = null;
-        if (!(StringUtils.hasText(userId))) {
-            passwordRandom = StringUtil.getRandomNumberAsString(6);
-            userId = userService.createUser(
-                    request.getName(), passwordRandom, request.getEmail(), request.getCitizenIdCard());
-        }
-
+        UserCreationRequest userCreationRequest = UserCreationRequest.builder()
+                    .username(request.getName())
+                    .email(request.getEmail())
+                    .citizenIdCard(request.getCitizenIdCard())
+                    .phone(request.getPhone())
+                    .build();
+        var result = userService.createUser(profileGetUserIdRequest, userCreationRequest, request.getName());
+        String userId = result.get(0);
         account.setUserId(userId);
 
         BigDecimal balance = request.getBalance();
@@ -75,7 +75,7 @@ public class AccountService {
         account.setStatus(status);
         AccountResponse accountResponse = accountMapper.toAccountResponse(accountRepository.save(account));
         accountResponse.setUserId(userId);
-        accountResponse.setPassword(passwordRandom);
+        accountResponse.setPassword(result.get(1));
 
         return accountResponse;
     }
@@ -84,7 +84,7 @@ public class AccountService {
         Account account =
                 accountRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_EXISTED));
         accountMapper.updateAccount(account, request);
-        return accountMapper.toAccountResponse(account);
+        return accountMapper.toAccountResponse(accountRepository.save(account));
     }
 
     public String deleteAccount(List<String> id) {

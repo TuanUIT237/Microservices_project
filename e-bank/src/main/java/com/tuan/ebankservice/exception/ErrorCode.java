@@ -63,6 +63,8 @@ public enum ErrorCode {
     LOAN_NOT_EXISTED(1546, "Loan not existed", HttpStatus.BAD_REQUEST),
     UNAUTHENTICATED(1006, "Unauthenticated", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED(1007, "You do not have permission", HttpStatus.FORBIDDEN),
+    AMOUNT_LOAN_OFF_INVALID(
+            1547, "Amount must be equal or greater than remaining principal", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

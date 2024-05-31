@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.tuan.ebankservice.dto.userdto.UserCreationRequest;
 import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -67,14 +68,14 @@ public class CreditCardService {
                 .citizenIdCard(request.getCitizenIdCard())
                 .fullName(request.getName())
                 .build();
-        String userId = profileClient.getUserId(profileGetUserIdRequest);
-        String passwordRandom = null;
-        if (!(StringUtils.hasText(userId))) {
-            passwordRandom = StringUtil.getRandomNumberAsString(6);
-            userId = userService.createUser(
-                    request.getName(), passwordRandom, request.getEmail(), request.getCitizenIdCard());
-        }
-
+        UserCreationRequest userCreationRequest = UserCreationRequest.builder()
+                .username(request.getName())
+                .email(request.getEmail())
+                .citizenIdCard(request.getCitizenIdCard())
+                .phone(request.getPhone())
+                .build();
+        var result = userService.createUser(profileGetUserIdRequest, userCreationRequest, request.getName());
+        String userId = result.get(0);
         CreditCard creditCard = creditCardMapper.toCreditCard(request);
         creditCard.setUserId(userId);
         creditCard.setTotalLimit(request.getLimit());
@@ -86,7 +87,7 @@ public class CreditCardService {
         CreditCardResponse creditCardResponse =
                 creditCardMapper.toCreditCardResponse(creditCardRepository.save(creditCard));
         creditCardResponse.setUserId(userId);
-        creditCardResponse.setPassword(passwordRandom);
+        creditCardResponse.setPassword(result.get(1));
 
         return creditCardResponse;
     }
@@ -147,7 +148,7 @@ public class CreditCardService {
         return addCreditCardPayment(creditCard, creditCardPayment, request.getAmount());
     }
 
-    @Transactional
+
     public CreditCardPaymentResponse addCreditCardPayment(
             CreditCard creditCard, CreditCardPayment creditCardPayment, BigDecimal amount)
             throws JsonProcessingException {
@@ -167,10 +168,7 @@ public class CreditCardService {
                 creditCardPaymentMapper.toCreditCardPaymentResponse(creditCardPayment);
         creditCardPaymentResponse.setCreditCardId(creditCard.getId());
 
-        LocalDateTime paymentDate = creditCardPaymentService
-                .getCreditCardPayment(creditCardPayment.getId())
-                .getPaymentDate();
-        creditCardPaymentResponse.setPaymentDate(paymentDate);
+        creditCardPaymentResponse.setPaymentDate(LocalDateTime.now());
 
         return creditCardPaymentResponse;
     }
@@ -180,7 +178,7 @@ public class CreditCardService {
                 .findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.CREDIT_CARD_NOT_EXISTED));
         creditCardMapper.updateCreditCard(creditCard, request);
-        return creditCardMapper.toCreditCardResponse(creditCard);
+        return creditCardMapper.toCreditCardResponse(creditCardRepository.save(creditCard));
     }
 
     @Transactional

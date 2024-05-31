@@ -24,6 +24,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AccountController {
     AccountService accountService;
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     @PostMapping("/create")
     ApiResponse<AccountResponse> createAccount(@RequestBody @Valid AccountCreationRequest request) {
         return ApiResponse.<AccountResponse>builder()
@@ -32,7 +33,7 @@ public class AccountController {
                 .result(accountService.createAccount(request))
                 .build();
     }
-
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     @GetMapping("/")
     ApiResponse<List<AccountResponse>> getAllAccounts() {
         return ApiResponse.<List<AccountResponse>>builder()
@@ -41,7 +42,7 @@ public class AccountController {
                 .result(accountService.getAllAccounts())
                 .build();
     }
-
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     @PutMapping("/update/{account_id}")
     ResponseEntity<ApiResponse<AccountResponse>> updateAccount(
             @PathVariable String account_id, @RequestBody @Valid AccountUpdateRequest request) {
@@ -52,7 +53,7 @@ public class AccountController {
                         .result(accountService.updateAccount(account_id, request))
                         .build());
     }
-
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     @DeleteMapping("/delete")
     ResponseEntity<ApiResponse<String>> deleteAccount(@RequestBody @Valid List<String> request) {
         return ResponseEntity.status(HttpStatus.OK)
@@ -62,7 +63,7 @@ public class AccountController {
                         .result(accountService.deleteAccount(request))
                         .build());
     }
-
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE','USER')")
     @GetMapping("/{account_number}")
     ApiResponse<AccountResponse> getAccount(@PathVariable String account_number) {
         return ApiResponse.<AccountResponse>builder()
@@ -71,7 +72,7 @@ public class AccountController {
                 .result(accountService.getAccount(account_number))
                 .build();
     }
-
+    @PreAuthorize("hasRole('USER')")
     @PostMapping("/deposit")
     ApiResponse<String> deposit(@RequestBody @Valid CreditDebitAccountRequest request) throws JsonProcessingException {
         return ApiResponse.<String>builder()
@@ -80,7 +81,7 @@ public class AccountController {
                 .result(accountService.deposit(request))
                 .build();
     }
-
+    @PreAuthorize("hasRole('USER')")
     @PostMapping("/withdraw")
     ApiResponse<String> withdraw(@RequestBody @Valid CreditDebitAccountRequest request) throws JsonProcessingException {
         return ApiResponse.<String>builder()
@@ -89,7 +90,7 @@ public class AccountController {
                 .result(accountService.withdraw(request))
                 .build();
     }
-
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
     @PostMapping("/transfer")
     ApiResponse<String> transfer(@RequestBody @Valid TransferRequest request) throws JsonProcessingException {
         return ApiResponse.<String>builder()
@@ -98,7 +99,7 @@ public class AccountController {
                 .result(accountService.transfer(request))
                 .build();
     }
-
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     @PutMapping("/cancel/{account_id}")
     ApiResponse<String> cancel(@PathVariable String account_id) {
         return ApiResponse.<String>builder()

@@ -7,8 +7,9 @@ import com.tuan.ebankservice.dto.accountdto.AccountCreationRequest;
 import com.tuan.ebankservice.dto.accountdto.AccountResponse;
 import com.tuan.ebankservice.dto.accountdto.AccountUpdateRequest;
 import com.tuan.ebankservice.entity.Account;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface AccountMapper {
     Account toAccount(AccountCreationRequest request);
 

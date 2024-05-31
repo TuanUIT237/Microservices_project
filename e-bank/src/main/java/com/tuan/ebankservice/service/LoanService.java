@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+import com.tuan.ebankservice.dto.userdto.UserCreationRequest;
 import jakarta.transaction.Transactional;
 
 import org.springframework.stereotype.Service;
@@ -51,13 +52,14 @@ public class LoanService {
                 .citizenIdCard(request.getCitizenIdCard())
                 .fullName(request.getName())
                 .build();
-        String userId = profileClient.getUserId(profileGetUserIdRequest);
-        String passwordRandom = null;
-        if (!(StringUtils.hasText(userId))) {
-            passwordRandom = StringUtil.getRandomNumberAsString(6);
-            userId = userService.createUser(
-                    request.getName(), passwordRandom, request.getEmail(), request.getCitizenIdCard());
-        }
+        UserCreationRequest userCreationRequest = UserCreationRequest.builder()
+                .username(request.getName())
+                .email(request.getEmail())
+                .citizenIdCard(request.getCitizenIdCard())
+                .phone(request.getPhone())
+                .build();
+        var result = userService.createUser(profileGetUserIdRequest, userCreationRequest, request.getName());
+        String userId = result.get(0);
         Loan loan = loanMapper.toLoan(request);
         loan.setUserId(userId);
         loan.setMonthlyInstallmentAmount(calculateMonthlyInstallmentAmount(request));
@@ -68,7 +70,7 @@ public class LoanService {
 
         LoanResponse loanResponse = loanMapper.toLoanResponse(loanRepository.save(loan));
         loanResponse.setUserId(userId);
-        loanResponse.setPassword(passwordRandom);
+        loanResponse.setPassword(result.get(1));
 
         return loanResponse;
     }
@@ -81,7 +83,7 @@ public class LoanService {
     public LoanResponse updateLoan(String id, LoanUpdateRequest request) {
         Loan loan = loanRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.LOAN_NOT_EXISTED));
         loanMapper.updateLoan(loan, request);
-        return loanMapper.toLoanResponse(loan);
+        return loanMapper.toLoanResponse(loanRepository.save(loan));
     }
 
     private BigDecimal getTotalInterest(LoanCreationRequest request) {
@@ -162,6 +164,7 @@ public class LoanService {
         sendNotificationService.sendDebtLoan(loan.getId(), notificationRequest);
         LoanPaymentResponse loanPaymentResponse = loanPaymentMapper.toLoanPaymentResponse(loanPayment);
         loanPaymentResponse.setLoanId(loan.getId());
+        loanPaymentResponse.setPaymentDate(LocalDateTime.now());
         return loanPaymentResponse;
     }
 
@@ -171,8 +174,8 @@ public class LoanService {
                 .findById(request.getLoanId())
                 .orElseThrow(() -> new RuntimeException("Loan not existed"));
         if (loan.getRemainingPrincipal().equals(BigDecimal.ZERO)) throw new AppException(ErrorCode.LOAN_PAID_OFF);
-        if (loan.getRemainingPrincipal().compareTo(request.getAmount()) >= 0)
-            throw new AppException(ErrorCode.AMOUNT_LOAN_INVALID);
+        if (loan.getRemainingPrincipal().compareTo(request.getAmount()) < 0)
+            throw new AppException(ErrorCode.AMOUNT_LOAN_OFF_INVALID);
         loan.setRemainingPrincipal(BigDecimal.ZERO);
         loan.setStatus(LoanStatus.PAID.name());
         LoanPayment loanPayment = loanPaymentService.createLoanPayment(request);

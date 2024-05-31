@@ -29,5 +29,5 @@ public interface ProfileCilent {
     @PutMapping(value = "/users/update", produces = MediaType.APPLICATION_JSON_VALUE)
     UserProfileResponse updateProfiles(@RequestBody ProfileUpdateRequest request);
     @DeleteMapping(value = "/users/delete", produces = MediaType.APPLICATION_JSON_VALUE)
-    String deleteProfiles(@RequestBody List<String> request);
+    void deleteProfiles(@RequestBody List<String> request);
 }

@@ -19,13 +19,7 @@ import lombok.experimental.FieldDefaults;
 public class AccountUpdateRequest {
     @BigDecimalLength(min = 1, message = "BALANCE_ACCOUNT_INVALID")
     BigDecimal balance;
-
-    @NotBlank(message = "NAME_ACCOUNT_NOT_BLANK")
     String name;
-
-    @NotBlank(message = "STATUS_ACCOUNT_NOT_BLANK")
     String status;
-
-    @NotNull(message = "CANCEL_DATE_ACCOUNT_NOT_NULL")
     LocalDateTime cancelDate;
 }

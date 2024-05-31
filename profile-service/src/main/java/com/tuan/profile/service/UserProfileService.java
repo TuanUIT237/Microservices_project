@@ -1,5 +1,6 @@
 package com.tuan.profile.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -69,9 +70,8 @@ public class UserProfileService {
         return userProfileRepository.existsByEmail(email);
     }
 
-    public String deleteProfile(List<String> request) {
+    public void deleteProfile(List<String> request) {
         request.forEach(userProfileRepository::deleteByUserId);
-        return "Profile has been deleted";
     }
 
     public UserProfileResponse getProfileBtUserId(String userId) {

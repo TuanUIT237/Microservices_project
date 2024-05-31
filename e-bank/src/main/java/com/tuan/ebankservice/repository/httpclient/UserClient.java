@@ -16,6 +16,6 @@ public interface UserClient {
     @PostMapping(value = "/users/create", produces = MediaType.APPLICATION_JSON_VALUE)
     ApiResponse<UserResponse> createUser(@RequestBody UserCreationRequest request);
 
-    @PostMapping(value = "/users/registrationtokens", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/users/registration-tokens", produces = MediaType.APPLICATION_JSON_VALUE)
     List<String> getRegistrationTokens(@RequestBody String userid);
 }

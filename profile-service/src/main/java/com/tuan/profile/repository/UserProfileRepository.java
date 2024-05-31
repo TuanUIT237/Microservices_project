@@ -15,4 +15,5 @@ public interface UserProfileRepository extends Neo4jRepository<UserProfile, Stri
 
     UserProfile findByUserId(String userId);
     void deleteByUserId(String id);
+    boolean existsByUserId(String id);
 }
