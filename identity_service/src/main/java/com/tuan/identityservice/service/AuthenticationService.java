@@ -15,18 +15,22 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.tuan.identityservice.dto.AutheticationDto.*;
+import com.tuan.identityservice.dto.ProfileDto.UserProfileResponse;
+import com.tuan.identityservice.dto.notificationdto.MessageLoginRequest;
 import com.tuan.identityservice.entity.InvalidatedToken;
 import com.tuan.identityservice.entity.User;
 import com.tuan.identityservice.exception.AppException;
 import com.tuan.identityservice.exception.ErrorCode;
 import com.tuan.identityservice.repository.InvalidatedTokenRepository;
 import com.tuan.identityservice.repository.UserRepository;
+import com.tuan.identityservice.repository.httpcilent.ProfileCilent;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +45,10 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthenticationService {
     UserRepository userRepository;
     InvalidatedTokenRepository invalidatedTokenRepository;
-    RedisTemplate<String,String> redisTemplate;
+    RedisTemplate<String, String> redisTemplate;
+    SendNotificationService sendNotificationService;
+    ProfileCilent profileCilent;
+
     @NonFinal
     @Value("${jwt.signerKey}")
     protected String SIGNER_KEY;
@@ -65,7 +72,7 @@ public class AuthenticationService {
         return VerifyTokenResponse.builder().valid(isValid).build();
     }
 
-    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+    public AuthenticationResponse authenticate(AuthenticationRequest request) throws JsonProcessingException {
         var user = userRepository
                 .findByUsername(request.getUsername())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
@@ -73,11 +80,20 @@ public class AuthenticationService {
         boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
         if (!authenticated) throw new AppException(ErrorCode.UNAUTHENTICATED);
         var token = generateToken(user);
-        String key = String.format("userid: %s",user.getId());
-        if(!Objects.isNull(redisTemplate.opsForValue().get(key)))
-            throw new AppException(ErrorCode.ONE_ACCOUNT_LOGIN);
-        redisTemplate.opsForValue().set(key,token);
-        log.info(key + " "+redisTemplate.opsForValue().get(key));
+        if (!user.getUsername().equals("admin")) {
+            UserProfileResponse userProfileResponse = profileCilent.getProfileByUserId(user.getId());
+            log.info(userProfileResponse.toString());
+            String key = String.format("userid: %s", user.getId());
+            if (!Objects.isNull(redisTemplate.opsForValue().get(key)))
+                throw new AppException(ErrorCode.ONE_ACCOUNT_LOGIN);
+            redisTemplate.opsForValue().set(key, token);
+            log.info(key + " " + redisTemplate.opsForValue().get(key));
+            MessageLoginRequest messageLoginRequest = MessageLoginRequest.builder()
+                    .email(userProfileResponse.getEmail())
+                    .phone(userProfileResponse.getPhone())
+                    .build();
+            sendNotificationService.sendLoginMessage(user.getId(), messageLoginRequest);
+        }
         return AuthenticationResponse.builder().token(token).build();
     }
 
@@ -125,9 +141,11 @@ public class AuthenticationService {
             InvalidatedToken invalidatedToken =
                     InvalidatedToken.builder().id(jit).expiryTime(expiryTime).build();
             invalidatedTokenRepository.save(invalidatedToken);
-            User user = userRepository.findByUsername(username).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-            String key = String.format("userid: %s",user.getId());
-            log.info(key + " " +redisTemplate.opsForValue().get(key));
+            User user = userRepository
+                    .findByUsername(username)
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+            String key = String.format("userid: %s", user.getId());
+            log.info(key + " " + redisTemplate.opsForValue().get(key));
             redisTemplate.delete(key);
         } catch (AppException e) {
             throw new AppException(ErrorCode.TOKEN_EXPIRED);
@@ -145,9 +163,9 @@ public class AuthenticationService {
         var user =
                 userRepository.findByUsername(username).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         var newToken = generateToken(user);
-        String key = String.format("userid: %s",user.getId());
-        redisTemplate.opsForValue().set(key,newToken);
-        log.info(key + " " +redisTemplate.opsForValue().get(key));
+        String key = String.format("userid: %s", user.getId());
+        redisTemplate.opsForValue().set(key, newToken);
+        log.info(key + " " + redisTemplate.opsForValue().get(key));
         return AuthenticationResponse.builder().token(newToken).build();
     }
 

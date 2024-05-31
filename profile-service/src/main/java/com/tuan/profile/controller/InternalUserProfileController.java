@@ -1,5 +1,6 @@
 package com.tuan.profile.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.tuan.profile.dto.userprofileDto.ProfileCreationRequest;
@@ -17,7 +18,6 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class InternalUserProfileController {
     UserProfileService userProfileService;
-
     @PostMapping("/create")
     UserProfileResponse createProfile(@RequestBody ProfileCreationRequest request) {
         return userProfileService.createProfile(request);
@@ -27,8 +27,14 @@ public class InternalUserProfileController {
     String getUserId(@RequestBody ProfileGetUserIdRequest request) {
         return userProfileService.findUserIdByName(request);
     }
+
     @PostMapping("/emailvalid")
-    boolean emailExisted(@RequestBody String email){
+    boolean emailExisted(@RequestBody String email) {
         return userProfileService.findEmailExisted(email);
+    }
+
+    @PostMapping("/user")
+    UserProfileResponse getProfileByUserId(@RequestBody String userId) {
+        return userProfileService.getProfileBtUserId(userId);
     }
 }

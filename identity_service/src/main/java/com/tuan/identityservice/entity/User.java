@@ -24,6 +24,7 @@ public class User {
 
     @ManyToMany
     Set<Role> roles;
+
     @OneToMany
     @JoinColumn(name = "userid")
     List<RegistrationToken> registrationTokens;

@@ -21,7 +21,9 @@ public class SecurityConfig {
     @Autowired
     private CustomJwtDecoder customJwtDecoder;
 
-    private final String[] PUBLIC_ENDPOINTS = {"/internal/create", "/internal/userid","/internal/emailvalid"};
+    private final String[] PUBLIC_ENDPOINTS = {
+        "/internal/create", "/internal/userid", "/internal/emailvalid", "/internal/user"
+    };
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {

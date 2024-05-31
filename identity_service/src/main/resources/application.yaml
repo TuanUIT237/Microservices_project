@@ -16,7 +16,10 @@ spring:
     redis:
       host: localhost
       port: 6379
-
+  kafka:
+    bootstrap-servers: localhost:9092
+    template:
+      default-topic: login
 jwt:
   signerKey: "OJfWofIdZSU2EBdUs6ucDLdAQCkFMVRiHe14X7UpulJmlIW0YVgYnZSlE5JcvrCr"
   valid-duration: 3600 # in second

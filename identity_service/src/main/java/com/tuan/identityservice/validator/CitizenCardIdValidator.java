@@ -11,7 +11,7 @@ public class CitizenCardIdValidator implements ConstraintValidator<CitizenCardId
 
     @Override
     public boolean isValid(String citizenCardId, ConstraintValidatorContext constraintValidatorContext) {
-        if(citizenCardId == null) {
+        if (citizenCardId == null) {
             return false;
         }
 

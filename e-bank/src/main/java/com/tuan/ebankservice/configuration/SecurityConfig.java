@@ -8,8 +8,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
@@ -22,15 +20,14 @@ public class SecurityConfig {
     private CustomJwtDecoder customJwtDecoder;
 
     private final String[] PUBLIC_ENDPOINTS = {
-            "/account/withdraw",
-            "/account/transfer",
-            "/account/deposit",
-            "/account/create",
-            "/transaction/",
-            "/loan/create",
-            "/credit/create",
-            "/credit/spend",
-            "/credit/add"
+        "/account/withdraw",
+        "/account/transfer",
+        "/account/deposit",
+        "/account/create",
+        "/transaction/",
+        "/loan/create",
+        "/credit/create",
+        "/credit/spend",
     };
 
     @Bean

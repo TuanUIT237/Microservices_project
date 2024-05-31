@@ -1,7 +1,8 @@
 package com.tuan.identityservice.dto.UserDto;
 
-import java.util.List;
+import java.time.LocalDate;
 
+import jakarta.validation.constraints.Null;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -15,5 +16,9 @@ public class UserUpdateRequest {
     String password;
     String firstName;
     String lastName;
-    List<String> roles;
+    String phone;
+    String email;
+    String citizenIdCard;
+    LocalDate dob;
+    String city;
 }

@@ -2,8 +2,6 @@ package com.tuan.ebankservice.exception;
 
 import lombok.Data;
 
-
-
 @Data
 public class AppException extends RuntimeException {
     public AppException(ErrorCode errorCode) {

@@ -1,10 +1,9 @@
 package com.tuan.ebankservice.dto.transactiondto;
 
+import java.time.LocalDate;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor

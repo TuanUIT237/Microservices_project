@@ -1,9 +1,9 @@
 package com.tuan.ebankservice.validator;
 
+import java.math.BigDecimal;
+
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-
-import java.math.BigDecimal;
 
 public class BigDecimalLengthValidator implements ConstraintValidator<BigDecimalLength, BigDecimal> {
     private int min;

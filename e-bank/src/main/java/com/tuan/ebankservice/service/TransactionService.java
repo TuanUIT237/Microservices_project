@@ -1,18 +1,19 @@
 package com.tuan.ebankservice.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import com.tuan.ebankservice.dto.transactiondto.BankStatementRequest;
 import com.tuan.ebankservice.dto.transactiondto.TransactionRequest;
 import com.tuan.ebankservice.entity.Transaction;
 import com.tuan.ebankservice.mapper.TransactionMapper;
 import com.tuan.ebankservice.repository.TransactionRepository;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +21,8 @@ import java.util.List;
 public class TransactionService {
     TransactionRepository transactionRepository;
     TransactionMapper transactionMapper;
-    public void saveTransaction(TransactionRequest request, String type){
+
+    public void saveTransaction(TransactionRequest request, String type) {
         Transaction transaction = transactionMapper.toTransaction(request);
         transaction.setType(type);
         transactionRepository.save(transaction);
@@ -30,6 +32,7 @@ public class TransactionService {
         LocalDateTime start = request.getStartDate().atStartOfDay();
         LocalDateTime end = request.getEndDate().atStartOfDay().plusDays(1);
 
-        return transactionRepository.findAllByAccountNumberfromAndTransferDateBetween(request.getAccountNumber(), start, end);
+        return transactionRepository.findAllByAccountNumberfromAndTransferDateBetween(
+                request.getAccountNumber(), start, end);
     }
 }

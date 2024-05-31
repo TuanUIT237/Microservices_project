@@ -1,11 +1,12 @@
 package com.tuan.identityservice.service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 
-import com.tuan.identityservice.entity.RegistrationToken;
-import com.tuan.identityservice.repository.RegistrationTokenRepository;
 import jakarta.transaction.Transactional;
+
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,13 +18,13 @@ import com.tuan.identityservice.dto.ProfileDto.UserProfileResponse;
 import com.tuan.identityservice.dto.UserDto.UserCreationRequest;
 import com.tuan.identityservice.dto.UserDto.UserResponse;
 import com.tuan.identityservice.dto.UserDto.UserUpdateRequest;
-import com.tuan.identityservice.dto.UserDto.UsersDeleteRequest;
 import com.tuan.identityservice.entity.Role;
 import com.tuan.identityservice.entity.User;
 import com.tuan.identityservice.exception.AppException;
 import com.tuan.identityservice.exception.ErrorCode;
 import com.tuan.identityservice.mapper.ProfileMapper;
 import com.tuan.identityservice.mapper.UserMapper;
+import com.tuan.identityservice.repository.RegistrationTokenRepository;
 import com.tuan.identityservice.repository.RoleRepository;
 import com.tuan.identityservice.repository.UserRepository;
 import com.tuan.identityservice.repository.httpcilent.ProfileCilent;
@@ -39,18 +40,16 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class UserService {
     UserRepository userRepository;
-    RoleRepository roleRepository;
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
     ProfileCilent profileCilent;
     ProfileMapper profileMapper;
     RegistrationTokenRepository registrationToken;
+
     @Transactional
     public UserResponse createUser(UserCreationRequest request) {
-        if (userRepository.existsByUsername(request.getUsername()))
-            throw new AppException(ErrorCode.USER_EXISTED);
-        if(profileCilent.emailExisted(request.getEmail()))
-            throw new AppException(ErrorCode.EMAIL_EXISTED);
+        if (userRepository.existsByUsername(request.getUsername())) throw new AppException(ErrorCode.USER_EXISTED);
+        if (profileCilent.emailExisted(request.getEmail())) throw new AppException(ErrorCode.EMAIL_EXISTED);
         User user = userMapper.toUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
@@ -72,41 +71,53 @@ public class UserService {
         var context = SecurityContextHolder.getContext();
         String name = context.getAuthentication().getName();
         User user = userRepository.findByUsername(name).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        return userMapper.toUserResponse(user);
+        UserResponse userResponse = userMapper.toUserResponse(user);
+        userMapper.toUserResponsefromUserProfile(userResponse, profileCilent.getProfileByUserId(user.getId()));
+        return userResponse;
     }
+
 
     public UserResponse updateUser(UserUpdateRequest request) {
         User user = userRepository
                 .findById(request.getUserId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        userMapper.updateUser(user, request);
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-
-        var roles = roleRepository.findAllById(request.getRoles());
-        user.setRoles(new HashSet<>(roles));
-        return userMapper.toUserResponse(userRepository.save(user));
+        if(!Objects.isNull(request.getPassword()))
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        UserResponse userResponse = userMapper.toUserResponse(userRepository.save(user));
+        UserProfileResponse userProfileResponse =
+                profileCilent.updateProfiles(profileMapper.toProfileUpdateRequest(request));
+        userMapper.toUserResponsefromUserProfile(userResponse, userProfileResponse);
+        return userResponse;
     }
 
-    public void deleteUser(String userId) {
-        userRepository.deleteById(userId);
-    }
-
-    @PreAuthorize("hasRole('admin')")
     public List<UserResponse> getUsers() {
         return userRepository.findAll().stream()
                 .map((userMapper::toUserResponse))
                 .toList();
     }
 
-    @PostAuthorize("returnObject.username==authentication.name")
     public UserResponse getUser(String id) {
-        return userMapper.toUserResponse(
+        UserResponse userResponse = userMapper.toUserResponse(
                 userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found")));
+        userMapper.toUserResponsefromUserProfile(userResponse, profileCilent.getProfileByUserId(id));
+        return userResponse;
     }
-    public void deleteUsers(UsersDeleteRequest request) {
-        request.getUserids().forEach(userRepository::deleteById);
+    @Transactional
+    public List<String> deleteUsers(List<String> request) {
+        List<String> deleteUserSuccess = new ArrayList<>();
+        request.forEach(id ->{
+            boolean isFound;
+            isFound = userRepository.existsById(id);
+            if(isFound){
+                userRepository.deleteById(id);
+                deleteUserSuccess.add(id);
+            }
+        });
+        profileCilent.deleteProfiles(deleteUserSuccess);
+        return deleteUserSuccess;
     }
-    public List<String> getRegistrationToken(String userId){
+
+    public List<String> getRegistrationToken(String userId) {
         return registrationToken.findTokenByUserId(userId);
     }
 }

@@ -1,10 +1,12 @@
 package com.tuan.identityservice.controller;
 
 import java.util.List;
+import java.util.Objects;
 
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,7 +14,6 @@ import com.tuan.identityservice.dto.APIRespone.ApiResponse;
 import com.tuan.identityservice.dto.UserDto.UserCreationRequest;
 import com.tuan.identityservice.dto.UserDto.UserResponse;
 import com.tuan.identityservice.dto.UserDto.UserUpdateRequest;
-import com.tuan.identityservice.dto.UserDto.UsersDeleteRequest;
 import com.tuan.identityservice.service.UserService;
 
 import lombok.AccessLevel;
@@ -27,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserController {
     UserService userService;
+
     @PostMapping("/create")
     ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest request) {
         return ApiResponse.<UserResponse>builder()
@@ -34,7 +36,14 @@ public class UserController {
                 .result(userService.createUser(request))
                 .build();
     }
-
+    @GetMapping("/userinfo")
+    ApiResponse<UserResponse> getUserInfo() {
+        return ApiResponse.<UserResponse>builder()
+                .status("success")
+                .result(userService.getUserInfo())
+                .build();
+    }
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     @GetMapping("/")
     ApiResponse<List<UserResponse>> getUsers() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -45,15 +54,7 @@ public class UserController {
                 .result(userService.getUsers())
                 .build();
     }
-
-    @GetMapping("/userinfo")
-    ApiResponse<UserResponse> getUserInfo() {
-        return ApiResponse.<UserResponse>builder()
-                .status("success")
-                .result(userService.getUserInfo())
-                .build();
-    }
-
+    @PostAuthorize("returnObject.username==authentication.name")
     @GetMapping("/{userId}")
     ApiResponse<UserResponse> getUser(@PathVariable("userId") String userId) {
         return ApiResponse.<UserResponse>builder()
@@ -61,31 +62,31 @@ public class UserController {
                 .result(userService.getUser(userId))
                 .build();
     }
-
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     @PutMapping("/update")
     UserResponse updateUser(@RequestBody UserUpdateRequest request) {
         return userService.updateUser(request);
     }
 
-    @DeleteMapping("/{userId}")
-    ApiResponse<String> deleteUser(@PathVariable String userId) {
-        userService.deleteUser(userId);
-        return ApiResponse.<String>builder()
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
+    @DeleteMapping("/delete")
+    ApiResponse<List<String>> deleteUsers(@RequestBody List<String> request) {
+        String message = "List user has been deleted successful";
+        var result = userService.deleteUsers(request);
+        if(result.isEmpty())
+        {
+            message = "No user have been deleted";
+            result = null;
+        }
+        return ApiResponse.<List<String>>builder()
                 .status("success")
-                .result("User has been deleted")
+                .message(message)
+                .result(result)
                 .build();
     }
 
-    @PostMapping("/delete")
-    ApiResponse<String> deleteUsers(@RequestBody UsersDeleteRequest request) {
-        userService.deleteUsers(request);
-        return ApiResponse.<String>builder()
-                .status("success")
-                .result("Users have been deleted")
-                .build();
-    }
-    @PostMapping("/registrationtokens")
-    public List<String> getRegistrationTokens(@RequestBody String userid){
+    @PostMapping("/registration-tokens")
+    public List<String> getRegistrationTokens(@RequestBody String userid) {
         return userService.getRegistrationToken(userid);
     }
 }

@@ -1,17 +1,19 @@
 package com.tuan.ebankservice.dto.accountdto;
 
+import java.math.BigDecimal;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.tuan.ebankservice.util.AccountStatus;
-import com.tuan.ebankservice.validator.BigDecimalLength;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.math.BigDecimal;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class AccountResponse {
     String id;
     BigDecimal balance;

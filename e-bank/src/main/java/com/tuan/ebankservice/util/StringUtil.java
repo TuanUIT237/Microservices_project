@@ -1,10 +1,10 @@
 package com.tuan.ebankservice.util;
 
-import org.springframework.util.StringUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.util.StringUtils;
+
 public class StringUtil {
-    public static Long getRandomNumber(int charCount){
+    public static Long getRandomNumber(int charCount) {
 
         String randomNumeric;
         do {
@@ -12,14 +12,14 @@ public class StringUtil {
         } while (randomNumeric.startsWith("0"));
 
         Long randomLong = null;
-        if (StringUtils.hasText(randomNumeric)){
+        if (StringUtils.hasText(randomNumeric)) {
             randomLong = Long.parseLong(randomNumeric);
         }
 
         return randomLong;
     }
 
-    public static String getRandomNumberAsString(int charCount){
+    public static String getRandomNumberAsString(int charCount) {
 
         validateCharCount(charCount);
 
@@ -28,7 +28,7 @@ public class StringUtil {
         return randomNumeric;
     }
 
-    public static String getRandomString(int charCount){
+    public static String getRandomString(int charCount) {
 
         validateCharCount(charCount);
 
@@ -38,7 +38,7 @@ public class StringUtil {
     }
 
     private static void validateCharCount(int charCount) {
-        if (charCount < 0){
+        if (charCount < 0) {
             new RuntimeException("Char must be at least 1");
         }
     }

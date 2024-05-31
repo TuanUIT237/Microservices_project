@@ -9,5 +9,6 @@ public class PredefinedTransaction {
     public static final String DEPOSIT_SUCCESS = "Deposit successful";
     public static final String WITHDRAW_FAIL = "Withdraw failed";
     public static final String DELETE_TRANSACTION_SUCCESS = "Delete transaction successful";
-    private PredefinedTransaction(){}
+
+    private PredefinedTransaction() {}
 }

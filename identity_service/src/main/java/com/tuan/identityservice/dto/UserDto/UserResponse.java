@@ -22,5 +22,6 @@ public class UserResponse {
     String email;
     String citizenIdCard;
     LocalDate dob;
+    String city;
     Set<Role> roles;
 }

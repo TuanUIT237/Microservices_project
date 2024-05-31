@@ -1,17 +1,12 @@
 package com.tuan.ebankservice.dto.creditcarddto;
 
-import com.tuan.ebankservice.util.CreditPaymentType;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
-import lombok.experimental.NonFinal;
-
-
 import java.math.BigDecimal;
-
 import java.time.LocalDateTime;
 
-@Data
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
+@Data
 @NoArgsConstructor(force = true)
 @AllArgsConstructor
 @Builder

@@ -36,7 +36,10 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     IdentityService identityService;
     ObjectMapper objectMapper;
     @NonFinal
-    String[] public_endpoints = {"/identity/auth/.*","/identity/users/create","/ebank/account/create"};
+    String[] public_endpoints = {
+            "/identity/auth/.*",
+            "/identity/users/create",
+    };
 
     @Value("${app.api-prefix}")
     @NonFinal
